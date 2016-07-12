@@ -1,0 +1,9 @@
+ mongoimport --db cordir --collection project --file "data/cordis-fp7projects.csv" --type csv --headerline
+ mongoimport --db cordir --collection project --file "data/cordis-fp7projects.csv" --type csv --headerline
+ mongoimport --db cordir --collection organization --file "data/cordis-fp7organizations.csv" --type csv --headerline
+ mongoimport --db cordir --collection brief --file "data/cordis-fp7briefs.csv" --type csv --headerline
+ mongoimport --db cordir --collection country --file "data/cordisref-countries.csv" --type csv --headerline
+ mongoimport --db cordir --collection fundingScheme --file "data/cordisref-projectFundingSchemeCategory.csv" --type csv --headerline
+ mongoimport --db cordir --collection activityType --file "data/cordisref-organizationActivityType.csv" --type csv --headerline
+ mongoimport --db cordir --collection programme --file "data/cordisref-FP7programmes.csv" --type csv --headerline
+ mongoimport --db cordir --collection sicCode --file "data/cordisref-sicCode.csv" --type csv --headerline
