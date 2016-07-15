@@ -1,4 +1,32 @@
-db.project.find().snapshot().forEach(function(el) {
+
+//Comptage du nombre de topics
+db.project.mapReduce(
+    function() {
+     //emit(typeof(this.topics), 1);
+        if(typeof(this.topics)=="string"){
+            var sp=this.topics.split(',');
+            for(i=0;i<sp.length;i++){
+                emit( sp[i], 1);
+            }
+        }else{
+            emit(this.topics, 1);
+        }
+        
+    },
+    function(t, values) {return Array.sum(values);}
+    , {
+        out: "tmpResults"
+    }
+);
+db.tmpResults.find().count();
+db.tmpResults.find().forEach(function(data) {
+    print(data._id + "," + data.value );
+});
+db.tmpResults.find({_id:/eeeeee/})    
+//transformation des données
+var toto="dedeed";
+toto.split(',')
+db.project.find().forEach(function(el) {
     if (!Array.isArray(el.topics)) {
         el.topics = el.topics.split(',');
     }
@@ -6,7 +34,7 @@ db.project.find().snapshot().forEach(function(el) {
         el.participants = el.participants.split(',');
     }
     if (!Array.isArray(el.participantCountries)) {
-        el.participantsCountries = el.participantCountries.split(',');
+        el.participantCountries = el.participantCountries.split(',');
     }
     if (!Array.isArray(el.subjects)) {
         el.subjects = el.subjects.split(',');
@@ -24,6 +52,10 @@ db.project.find().snapshot().forEach(function(el) {
 
     db.project.save(el);
 });
+
+db.project.aggregate( 
+   {$group : {_id : "$topics"} }).find().count()
+   .result[0].count;
 
 db.project.aggregate({
     $group: {
