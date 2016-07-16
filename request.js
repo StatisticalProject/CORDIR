@@ -133,10 +133,80 @@ db.project.aggregate([{
      }
 ,{$out: "programmeAgreg" }]);
 
-db.programmeAgreg.find().forEach(function(data) {
+db.programmeAgreg.find().limit(30).forEach(function(data) {
     print(data._id + "," + data.programeDesc.ShortTitle + "," + data.count + "," + 
     data.totalCost + "," + data.avgTotalCost + "," + data.stdDevTotalCost + "," + data.minTotalCost + "," + data.maxTotalCost + "," +
     data.call + "," + data.avgCall + "," + data.stdDevCall + "," + data.minCall + "," + data.maxCall 
 
     );
 });
+
+//Aggregation par pays
+db.project.aggregate([
+    {
+        $unwind : "$participantCountries"
+    },
+    {
+    $group: {
+        _id: "$participantCountries",
+        count: {
+            $sum: 1
+        },
+        totalCost: {
+            $sum: '$totalCost'
+        },
+        avgTotalCost: {
+            $avg: '$totalCost'
+        },
+        stdDevTotalCost: {
+            $stdDevPop: '$totalCost'
+        },
+        minTotalCost: {
+            $min: '$totalCost'
+        },
+        maxTotalCost: {
+            $max: '$totalCost'
+        },
+        call: {
+            $sum: '$call'
+        },
+        avgCall: {
+            $avg: '$call'
+        },
+        stdDevCall: {
+            $stdDevPop: '$call'
+        },
+        minCall: {
+            $min: '$call'
+        }
+        ,
+        maxCall: {
+            $max:  '$call'  
+        }
+    }
+}, {
+    $sort: {
+        totalCost: -1
+    }
+}, {
+    $lookup: {
+        from: "country",
+        localField: "_id",
+        foreignField: "isoCode",
+        as: "country"
+    }
+},
+{
+        $unwind : "$country"
+    },
+    { $match : {"country.language":"fr"} 
+     }
+,{$out: "countryAgreg" }]);
+
+db.countryAgreg.find().limit(30).forEach(function(data) {
+    print( data.country.name + "," + data.count + "," + 
+    data.totalCost + "," + data.avgTotalCost + "," + data.stdDevTotalCost + "," + data.minTotalCost + "," + data.maxTotalCost + "," +
+    data.call + "," + data.avgCall + "," + data.stdDevCall + "," + data.minCall + "," + data.maxCall 
+
+    );
+});
