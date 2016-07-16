@@ -1,35 +1,20 @@
+/*
+db.activityType.drop();
+db.brief.drop();
+db.country.drop();
+db.fundingScheme.drop();
+db.organization.drop();
+db.programme.drop();
+db.project.drop();
+db.sicCode.drop();
+*/
 
-//Comptage du nombre de topics
-db.project.mapReduce(
-    function() {
-     //emit(typeof(this.topics), 1);
-        if(typeof(this.topics)=="string"){
-            var sp=this.topics.split(',');
-            for(i=0;i<sp.length;i++){
-                emit( sp[i], 1);
-            }
-        }else{
-            emit(this.topics, 1);
-        }
-        
-    },
-    function(t, values) {return Array.sum(values);}
-    , {
-        out: "tmpResults"
-    }
-);
-db.tmpResults.find().count();
-db.tmpResults.find().forEach(function(data) {
-    print(data._id + "," + data.value );
-});
-db.tmpResults.find({_id:/eeeeee/})    
-//transformation des données
-var toto="dedeed";
-toto.split(',')
-db.project.find().forEach(function(el) {
+//Changement des chaines en liste
+db.project.find({}).forEach(function(el) {
     if (!Array.isArray(el.topics)) {
         el.topics = el.topics.split(',');
     }
+    
     if (!Array.isArray(el.participants)) {
         el.participants = el.participants.split(',');
     }
@@ -39,10 +24,14 @@ db.project.find().forEach(function(el) {
     if (!Array.isArray(el.subjects)) {
         el.subjects = el.subjects.split(',');
     }
+    
     if (!Array.isArray(el.field21)) {
         el.field21 = el.field21.split(',');
     }
     if (!Array.isArray(el.field22)) {
+        if (el.field22 == null) {
+            el.field22 = "OTHER"
+        }
         if (typeof(el.field22) == "number") {
             el.field22 = "INF"
         }
@@ -52,10 +41,29 @@ db.project.find().forEach(function(el) {
 
     db.project.save(el);
 });
+//Liste des topics par valeur et 
+var mapTopics =function() {
+     var sp=this.topics;
+     for(i=0;i<sp.length;i++){
+         emit( sp[i], 1);
+     }
+};
+var reduceTopics =function(top,values) {
+    return Array.sum(values);
+}
+//nettoyage
+db.topicLists.drop();
+//Comptage du nombre de topics
+db.project.mapReduce(mapTopics,reduceTopics
+    , {
+        out: "topicLists"
+    }
+);
+db.topicLists.find().count();
+db.topicLists.find().sort({value:-1}).forEach(function(data) {
+    print(data._id + "," + data.value );
+});
 
-db.project.aggregate( 
-   {$group : {_id : "$topics"} }).find().count()
-   .result[0].count;
 
 db.project.aggregate({
     $group: {
