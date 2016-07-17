@@ -209,13 +209,15 @@ db.project.aggregate([
      }
 ,{$out: "countryAgreg" }]);
 
-db.countryAgreg.find().limit(30).forEach(function(data) {
+db.countryAgreg.find().forEach(function(data) {
     print( data.country.name + "," + data.count + "," + 
     data.totalCost + "," + data.avgTotalCost + "," + data.stdDevTotalCost + "," + data.minTotalCost + "," + data.maxTotalCost + "," +
     data.call + "," + data.avgCall + "," + data.stdDevCall + "," + data.minCall + "," + data.maxCall 
 
     );
 });
+
+db.subjCodeAgreg.drop();
 
 db.project.aggregate([
     {
