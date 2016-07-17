@@ -9,54 +9,67 @@ db.project.drop();
 db.sicCode.drop();
 db.subjects.drop();
 */
-
+db = connect("cordir")
+
 //Changement des chaines en liste
+print("Traitements des projets");
 db.project.find({}).forEach(function(el) {
     if (typeof(el.totalCost) == "string") {
-        el.totalCost=0;
+        el.totalCost=parseInt(el.totalCost);
     }
-    if (typeof(el.call) == "string") {
-        el.call=0;
-    }
-    
     if (typeof(el.ecMaxContribution) == "string") {
-        el.ecMaxContribution=0;
+        el.ecMaxContribution=parseInt(el.ecMaxContribution);
     }
     if (!Array.isArray(el.topics)) {
-        el.topics = el.topics.split(',');
+        el.topics = el.topics.split(';');
     }
     
     if (!Array.isArray(el.participants)) {
-        el.participants = el.participants.split(',');
+        el.participants = el.participants.split(';');
     }
     if (!Array.isArray(el.participantCountries)) {
-        el.participantCountries = el.participantCountries.split(',');
+        el.participantCountries = el.participantCountries.split(';');
     }
-    if (!Array.isArray(el.subjects)) {
-        el.subjects = el.subjects.split(',');
+    if (!Array.isArray(el.subjects)) {
+        if (el.subjects == null) {
+            el.subjects = "OTHER"
+        }
+        if (typeof(el.subjects) == "number") {
+            el.subjects = "INF"
+        }
+        el.subjects = el.subjects.split(';');
     }
+    
+    
+    if (!el.years||!Array.isArray(el.years)) {
+        el.endDate=new Date(el.endDate);
+        el.startDate=new Date(el.startDate);
+        el.period=el.endDate.getFullYear()-el.startDate.getFullYear();
+        if(el.period>0){
+            el.years=Array.apply(0, Array(el.period)).map(function (element, index) { 
+                return index + el.startDate.getFullYear();  
+            });
+        }else{
+            el.years = [];
+        }
+        
+    }
     
-    if (!Array.isArray(el.field21)) {
-        el.field21 = el.field21.split(',');
-    }
-    if (!Array.isArray(el.field22)) {
-        if (el.field22 == null) {
-            el.field22 = "OTHER"
-        }
-        if (typeof(el.field22) == "number") {
-            el.field22 = "INF"
-        }
-        el.field22 = el.field22.split(',');
-
-    }
 
     db.project.save(el);
 });
-//Liste des topics par valeur et 
+
+//Liste des topics par valeur
+print("Liste des topics par valeur");
+
 var mapTopics =function() {
-     var sp=this.topics;
-     for(i=0;i<sp.length;i++){
-         emit( sp[i], 1);
+     var sp=this.topics;
+     if(Array.isArray(sp)){
+         for(i=0;i<sp.length;i++){
+             emit( sp[i], 1);
+         }
+     }else{
+         emit( sp, 1);
      }
 };
 var reduceTopics =function(top,values) {
@@ -74,9 +87,12 @@ db.topicLists.find().count();
 db.topicLists.find().sort({value:-1}).forEach(function(data) {
     print(data._id + "," + data.value );
 });
+
 //trie des projets par cout
+print("Les 30 premiers Topics");
+print("Titres,Effectif,Contribution");
 db.project.find({totalCost:{$gt:5000000}}).sort({totalCost:-1}).limit(30).forEach(function(data) {
-    print(data.title + "," + data.totalCost + "," + data.call);
+    print(data.title + "," + data.totalCost + "," + data.ecMaxContribution);
 });
 
 //Aggregation des programmes
@@ -102,13 +118,13 @@ db.project.aggregate([{
         maxTotalCost: {
             $max: '$totalCost'
         },
-        call: {
-            $sum: '$call'
+        ecMaxContribution: {
+            $sum: '$ecMaxContribution'
         },
-        avgCall: {
-            $avg: '$call'
+        avgEcMaxContribution: {
+            $avg: '$ecMaxContribution'
         },
-        stdDevCall: {
+        stdDevEcMaxContribution: {
             $stdDevPop: '$call'
         },
         minCall: {
@@ -201,7 +217,14 @@ db.project.aggregate([
         foreignField: "isoCode",
         as: "country"
     }
-},
+}, {
+    $lookup: {
+        from: "country",
+        localField: "_id",
+        foreignField: "?euCode",
+        as: "country"
+    }
+},
 {
         $unwind : "$country"
     },
@@ -217,8 +240,8 @@ db.countryAgreg.find().forEach(function(data) {
     );
 });
 
+//Etude par sujet
 db.subjCodeAgreg.drop();
-
 db.project.aggregate([
     {
         $unwind : "$field22"
