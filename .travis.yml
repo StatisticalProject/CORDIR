@@ -1,0 +1,7 @@
+services:
+  - mongodb
+before_script:
+  - sleep 15
+  - mongo clean.js
+  - bash import.sh
+  - mongo request.js
