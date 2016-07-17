@@ -8,17 +8,35 @@ db.programme.drop();
 db.project.drop();
 db.sicCode.drop();
 db.subjects.drop();
+
+var txtFile = "test.txt";
+var file = new File(txtFile);
+var str = "My string of text";
+
+file.open("w"); // open file with write access
+file.writeln("First line of text");
+file.writeln("Second line of text " + str);
+file.write(str);
+file.close();
 */
 db = connect("cordir")
 
 //Changement des chaines en liste
 print("Traitements des projets");
-db.project.find({}).forEach(function(el) {
-    if (typeof(el.totalCost) == "string") {
-        el.totalCost=parseInt(el.totalCost);
-    }
-    if (typeof(el.ecMaxContribution) == "string") {
-        el.ecMaxContribution=parseInt(el.ecMaxContribution);
+db.project.find({}).forEach(function(el) {
+    if( 0 === el.totalCost.length){
+        el.totalCost=0;
+    }else{
+        if (typeof(el.totalCost) == "string") {
+            el.totalCost=parseInt(el.totalCost);
+        }
+    }
+    if( 0 === el.ecMaxContribution.length){
+        el.ecMaxContribution=0;
+    }else{
+        if (typeof(el.ecMaxContribution) == "string") {
+            el.ecMaxContribution=parseInt(el.ecMaxContribution);
+        }
     }
     if (!Array.isArray(el.topics)) {
         el.topics = el.topics.split(';');
@@ -44,13 +62,13 @@ db.project.find({}).forEach(function(el) {
     if (!el.years||!Array.isArray(el.years)) {
         el.endDate=new Date(el.endDate);
         el.startDate=new Date(el.startDate);
-        el.period=el.endDate.getFullYear()-el.startDate.getFullYear();
+        el.period=el.endDate.getFullYear()-el.startDate.getFullYear()+1;
         if(el.period>0){
             el.years=Array.apply(0, Array(el.period)).map(function (element, index) { 
                 return index + el.startDate.getFullYear();  
             });
         }else{
-            el.years = [];
+            el.years = [el.startDate.getFullYear()];
         }
         
     }
@@ -88,6 +106,17 @@ db.topicLists.find().sort({value:-1}).forEach(function(data) {
     print(data._id + "," + data.value );
 });
 
+//Les trentes premiers projets
+print("Les 30 premiers Projets");
+
+db.subjCodeAgreg.find().limit(30).forEach(function(data) {
+    print( data._id + "," + data.subjectCode.Title + "," + data.count + "," + 
+    data.totalCost + "," + data.avgTotalCost + "," + data.stdDevTotalCost + "," + data.minTotalCost + "," + data.maxTotalCost + "," +
+    data.call + "," + data.avgCall + "," + data.stdDevCall + "," + data.minCall + "," + data.maxCall 
+
+    );
+});
+
 //trie des projets par cout
 print("Les 30 premiers Topics");
 print("Titres,Effectif,Contribution");
@@ -96,6 +125,7 @@ db.project.find({totalCost:{$gt:5000000}}).sort({totalCost:-1}).limit(30).forEac
 });
 
 //Aggregation des programmes
+print("Aggregation des programmes");
 db.programmeAgreg.drop();
 db.project.aggregate([{
     $group: {
@@ -125,14 +155,14 @@ db.project.aggregate([{
             $avg: '$ecMaxContribution'
         },
         stdDevEcMaxContribution: {
-            $stdDevPop: '$call'
+            $stdDevPop: '$ecMaxContribution'
         },
-        minCall: {
-            $min: '$call'
+        minEcMaxContribution: {
+            $min: '$ecMaxContribution'
         }
         ,
-        maxCall: {
-            $max:  '$call'  
+        maxEcMaxContribution: {
+            $max:  '$ecMaxContribution'  
         }
     }
 }, {
@@ -152,16 +182,21 @@ db.project.aggregate([{
     { $match : {"programeDesc.Language":"fr"} 
      }
 ,{$out: "programmeAgreg" }]);
-
-db.programmeAgreg.find().limit(30).forEach(function(data) {
+
+
+print("Les Programmes");
+print("Code,Titre,Effectif,CoutTotal,TotalMoyen,TotalEcartType,TotalMin,TotalMax,ContributionTotal,ContributionMoyenne,ContributionEcartType,ContributionMin,ContributionMax");
+db.programmeAgreg.find().forEach(function(data) {
     print(data._id + "," + data.programeDesc.ShortTitle + "," + data.count + "," + 
     data.totalCost + "," + data.avgTotalCost + "," + data.stdDevTotalCost + "," + data.minTotalCost + "," + data.maxTotalCost + "," +
-    data.call + "," + data.avgCall + "," + data.stdDevCall + "," + data.minCall + "," + data.maxCall 
+    data.ecMaxContribution + "," + data.avgEcMaxContribution + "," + data.stdDevEcMaxContribution + "," + data.minEcMaxContribution + "," + data.maxEcMaxContribution 
 
     );
 });
 
-//Aggregation par pays
+//Aggregation par pays participants
+print("Aggregation par pays participants");
+
 db.countryAgreg.drop();
 
 db.project.aggregate([
@@ -189,21 +224,21 @@ db.project.aggregate([
         maxTotalCost: {
             $max: '$totalCost'
         },
-        call: {
-            $sum: '$call'
-        },
-        avgCall: {
-            $avg: '$call'
-        },
-        stdDevCall: {
-            $stdDevPop: '$call'
-        },
-        minCall: {
-            $min: '$call'
-        }
-        ,
-        maxCall: {
-            $max:  '$call'  
+        ecMaxContribution: {
+            $sum: '$ecMaxContribution'
+        },
+        avgEcMaxContribution: {
+            $avg: '$ecMaxContribution'
+        },
+        stdDevEcMaxContribution: {
+            $stdDevPop: '$ecMaxContribution'
+        },
+        minEcMaxContribution: {
+            $min: '$ecMaxContribution'
+        }
+        ,
+        maxEcMaxContribution: {
+            $max:  '$ecMaxContribution'  
         }
     }
 }, {
@@ -235,20 +270,20 @@ db.project.aggregate([
 db.countryAgreg.find().forEach(function(data) {
     print( data.country.name + "," + data.count + "," + 
     data.totalCost + "," + data.avgTotalCost + "," + data.stdDevTotalCost + "," + data.minTotalCost + "," + data.maxTotalCost + "," +
-    data.call + "," + data.avgCall + "," + data.stdDevCall + "," + data.minCall + "," + data.maxCall 
+    data.ecMaxContribution + "," + data.avgEcMaxContribution + "," + data.stdDevEcMaxContribution + "," + data.minEcMaxContribution + "," + data.maxEcMaxContribution 
 
     );
 });
 
-//Etude par sujet
-db.subjCodeAgreg.drop();
+//Aggregation par pays participants
+print("Aggregation par pays coordinateurs");
+
+db.countryCoorAgreg.drop();
+
 db.project.aggregate([
     {
-        $unwind : "$field22"
-    },
-    {
     $group: {
-        _id: "$field22",
+        _id: "$coordinatorCountry",
         count: {
             $sum: 1
         },
@@ -267,21 +302,101 @@ db.project.aggregate([
         maxTotalCost: {
             $max: '$totalCost'
         },
-        call: {
-            $sum: '$call'
+        ecMaxContribution: {
+            $sum: '$ecMaxContribution'
         },
-        avgCall: {
-            $avg: '$call'
+        avgEcMaxContribution: {
+            $avg: '$ecMaxContribution'
         },
-        stdDevCall: {
-            $stdDevPop: '$call'
+        stdDevEcMaxContribution: {
+            $stdDevPop: '$ecMaxContribution'
         },
-        minCall: {
-            $min: '$call'
+        minEcMaxContribution: {
+            $min: '$ecMaxContribution'
         }
         ,
-        maxCall: {
-            $max:  '$call'  
+        maxEcMaxContribution: {
+            $max:  '$ecMaxContribution'  
+        }
+    }
+}, {
+    $sort: {
+        totalCost: -1
+    }
+}, {
+    $lookup: {
+        from: "country",
+        localField: "_id",
+        foreignField: "isoCode",
+        as: "country"
+    }
+}, {
+    $lookup: {
+        from: "country",
+        localField: "_id",
+        foreignField: "?euCode",
+        as: "country"
+    }
+},
+{
+        $unwind : "$country"
+    },
+    { $match : {"country.language":"fr"} 
+     }
+,{$out: "countryCoorAgreg" }]);
+
+db.countryCoorAgreg.find().forEach(function(data) {
+    print( data.country.name + "," + data.count + "," + 
+    data.totalCost + "," + data.avgTotalCost + "," + data.stdDevTotalCost + "," + data.minTotalCost + "," + data.maxTotalCost + "," +
+    data.ecMaxContribution + "," + data.avgEcMaxContribution + "," + data.stdDevEcMaxContribution + "," + data.minEcMaxContribution + "," + data.maxEcMaxContribution 
+
+    );
+});
+
+//Etude par sujet
+
+print("Etude par sujet");
+db.subjCodeAgreg.drop();
+db.project.aggregate([
+    {
+        $unwind : "$subjects"
+    },
+    {
+    $group: {
+        _id: "$subjects",
+        count: {
+            $sum: 1
+        },
+        totalCost: {
+            $sum: '$totalCost'
+        },
+        avgTotalCost: {
+            $avg: '$totalCost'
+        },
+        stdDevTotalCost: {
+            $stdDevPop: '$totalCost'
+        },
+        minTotalCost: {
+            $min: '$totalCost'
+        },
+        maxTotalCost: {
+            $max: '$totalCost'
+        },
+        ecMaxContribution: {
+            $sum: '$ecMaxContribution'
+        },
+        avgEcMaxContribution: {
+            $avg: '$ecMaxContribution'
+        },
+        stdDevEcMaxContribution: {
+            $stdDevPop: '$ecMaxContribution'
+        },
+        minEcMaxContribution: {
+            $min: '$ecMaxContribution'
+        }
+        ,
+        maxEcMaxContribution: {
+            $max:  '$ecMaxContribution'  
         }
     }
 }, {
@@ -301,10 +416,10 @@ db.project.aggregate([
     }
 ,{$out: "subjCodeAgreg" }]);
 
-db.subjCodeAgreg.find().limit(30).forEach(function(data) {
-    print( data._id + "," + data.subjectCode.Title + "," + data.count + "," + 
+db.subjCodeAgreg.find().forEach(function(data) {
+    print( data._id + "," + data.subjectCode.Title + ","+ data.count + "," + 
     data.totalCost + "," + data.avgTotalCost + "," + data.stdDevTotalCost + "," + data.minTotalCost + "," + data.maxTotalCost + "," +
-    data.call + "," + data.avgCall + "," + data.stdDevCall + "," + data.minCall + "," + data.maxCall 
+    data.ecMaxContribution + "," + data.avgEcMaxContribution + "," + data.stdDevEcMaxContribution + "," + data.minEcMaxContribution + "," + data.maxEcMaxContribution 
 
     );
 });
