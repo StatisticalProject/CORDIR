@@ -6,7 +6,8 @@ db.fundingScheme.drop();
 db.organization.drop();
 db.programme.drop();
 db.project.drop();
-db.sicCode.drop();
+db.sicCode.drop();
+db.subjects.drop();
 */
 
 //Changement des chaines en liste
@@ -73,10 +74,13 @@ db.topicLists.find().count();
 db.topicLists.find().sort({value:-1}).forEach(function(data) {
     print(data._id + "," + data.value );
 });
-
-db.project.find({call:{ $type : 2 }})
-
+//trie des projets par cout
+db.project.find({totalCost:{$gt:5000000}}).sort({totalCost:-1}).limit(30).forEach(function(data) {
+    print(data.title + "," + data.totalCost + "," + data.call);
+});
+
 //Aggregation des programmes
+db.programmeAgreg.drop();
 db.project.aggregate([{
     $group: {
         _id: "$programme",
@@ -128,27 +132,98 @@ db.project.aggregate([{
     }
 }, {
         $unwind : "$programeDesc"
-    },
-    { $match : {"programeDesc.Language":"fr"} 
+    },
+    { $match : {"programeDesc.Language":"fr"} 
      }
 ,{$out: "programmeAgreg" }]);
 
 db.programmeAgreg.find().limit(30).forEach(function(data) {
-    print(data._id + "," + data.programeDesc.ShortTitle + "," + data.count + "," + 
-    data.totalCost + "," + data.avgTotalCost + "," + data.stdDevTotalCost + "," + data.minTotalCost + "," + data.maxTotalCost + "," +
+    print(data._id + "," + data.programeDesc.ShortTitle + "," + data.count + "," + 
+    data.totalCost + "," + data.avgTotalCost + "," + data.stdDevTotalCost + "," + data.minTotalCost + "," + data.maxTotalCost + "," +
+    data.call + "," + data.avgCall + "," + data.stdDevCall + "," + data.minCall + "," + data.maxCall 
+
+    );
+});
+
+//Aggregation par pays
+db.countryAgreg.drop();
+
+db.project.aggregate([
+    {
+        $unwind : "$participantCountries"
+    },
+    {
+    $group: {
+        _id: "$participantCountries",
+        count: {
+            $sum: 1
+        },
+        totalCost: {
+            $sum: '$totalCost'
+        },
+        avgTotalCost: {
+            $avg: '$totalCost'
+        },
+        stdDevTotalCost: {
+            $stdDevPop: '$totalCost'
+        },
+        minTotalCost: {
+            $min: '$totalCost'
+        },
+        maxTotalCost: {
+            $max: '$totalCost'
+        },
+        call: {
+            $sum: '$call'
+        },
+        avgCall: {
+            $avg: '$call'
+        },
+        stdDevCall: {
+            $stdDevPop: '$call'
+        },
+        minCall: {
+            $min: '$call'
+        }
+        ,
+        maxCall: {
+            $max:  '$call'  
+        }
+    }
+}, {
+    $sort: {
+        totalCost: -1
+    }
+}, {
+    $lookup: {
+        from: "country",
+        localField: "_id",
+        foreignField: "isoCode",
+        as: "country"
+    }
+},
+{
+        $unwind : "$country"
+    },
+    { $match : {"country.language":"fr"} 
+     }
+,{$out: "countryAgreg" }]);
+
+db.countryAgreg.find().limit(30).forEach(function(data) {
+    print( data.country.name + "," + data.count + "," + 
+    data.totalCost + "," + data.avgTotalCost + "," + data.stdDevTotalCost + "," + data.minTotalCost + "," + data.maxTotalCost + "," +
     data.call + "," + data.avgCall + "," + data.stdDevCall + "," + data.minCall + "," + data.maxCall 
 
     );
 });
 
-//Aggregation par pays
 db.project.aggregate([
     {
-        $unwind : "$participantCountries"
+        $unwind : "$field22"
     },
     {
     $group: {
-        _id: "$participantCountries",
+        _id: "$field22",
         count: {
             $sum: 1
         },
@@ -190,23 +265,21 @@ db.project.aggregate([
     }
 }, {
     $lookup: {
-        from: "country",
+        from: "subjects",
         localField: "_id",
-        foreignField: "isoCode",
-        as: "country"
+        foreignField: "Code",
+        as: "subjectCode"
     }
 },
 {
-        $unwind : "$country"
-    },
-    { $match : {"country.language":"fr"} 
-     }
-,{$out: "countryAgreg" }]);
+        $unwind : "$subjectCode"
+    }
+,{$out: "subjCodeAgreg" }]);
 
-db.countryAgreg.find().limit(30).forEach(function(data) {
-    print( data.country.name + "," + data.count + "," + 
+db.subjCodeAgreg.find().limit(30).forEach(function(data) {
+    print( data._id + "," + data.subjectCode.Title + "," + data.count + "," + 
     data.totalCost + "," + data.avgTotalCost + "," + data.stdDevTotalCost + "," + data.minTotalCost + "," + data.maxTotalCost + "," +
     data.call + "," + data.avgCall + "," + data.stdDevCall + "," + data.minCall + "," + data.maxCall 
 
     );
-});
+});
