@@ -31,7 +31,7 @@ db.project.find({}).forEach(function(el) {
             el.totalCost=parseInt(el.totalCost);
         }
     }
-    if( 0 === el.ecMaxContribution.length){
+    if( typeof(el.ecMaxContribution) == "undefined"  || 0 === el.ecMaxContribution.length){
         el.ecMaxContribution=0;
     }else{
         if (typeof(el.ecMaxContribution) == "string") {
