@@ -24,8 +24,7 @@ db = connect("cordir")
 //Changement des chaines en liste
 print("Traitements des projets");
 db.project.find({}).forEach(function(el) {
-    print (el.totalCost+" -- "+typeof(el.totalCost));
-    if( 0 === el.totalCost.length){
+    if( ! el.totalCost || 0 === el.totalCost.length){
         el.totalCost=0;
     }else{
         if (typeof(el.totalCost) == "string") {
