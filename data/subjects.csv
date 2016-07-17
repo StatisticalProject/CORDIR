@@ -1,0 +1,69 @@
+Group,Code,Title
+Industry and Technology,IND,INDUSTRIAL MANUFACTURE
+Industry and Technology,ELM,ELECTRONICS MICROELECTRONICS
+Industry and Technology,IPS,INFORMATION PROCESSING  INFORMATION SYSTEMS
+Industry and Technology,TEL,TELECOMMUNICATIONS
+Industry and Technology,TRA,TRANSPORT
+Industry and Technology,AER,AEROSPACE TECHNOLOGY
+Industry and Technology,CON,CONSTRUCTION TECHNOLOGY
+Industry and Technology,MAT,MATERIALS TECHNOLOGY
+Industry and Technology,ICT,ICT APPLICATIONS
+Industry and Technology,NET,NETWORK TECHNOLOGIES
+Industry and Technology,NNT,NANOTECHNOLOGY AND NANOSCIENCES
+Industry and Technology,IBI,INDUSTRIAL BIOTECH
+Industry and Technology,SPA,SPACE AND SATELLITE RESEARCH
+Industry and Technology,AUT,AUTOMATION
+Industry and Technology,ROB,ROBOTICS
+Industry and Technology,TEC,OTHER TECHNOLOGY
+Energy,FIS,NUCLEAR FISSION
+Energy,FUS,NUCLEAR FUSION
+Energy,FFU,FOSSIL FUELS
+Energy,RSE,RENEWABLE SOURCES OF ENERGY
+Energy,EST,ENERGY STORAGE ENERGY TRANSPORT
+Energy,ESV,ENERGY SAVING
+Energy,BIF,BIOFUELS
+Energy,HFC,HYDROGEN AND FUEL CELLS
+Energy,OET,OTHER ENERGY TOPICS
+Physical and Exact Sciences,MET,METEOROLOGY
+Physical and Exact Sciences,EAR,EARTH SCIENCES
+Physical and Exact Sciences,MST,MATHEMATICS STATISTICS
+Biological Sciences,MED,MEDICINE HEALTH
+Biological Sciences,BIO,BIOTECHNOLOGY
+Biological Sciences,LIF,LIFE SCIENCES
+Biological Sciences,HCS,HEALTHCARE DELIVERY/SERVICES
+Biological Sciences,MBI,MEDICAL BIOTECHNOLOGY
+Biological Sciences,VAS,VETERINARY AND ANIMAL SCIENCES
+Agriculture and Marine Resources and Products,AGR,AGRICULTURE
+Agriculture and Marine Resources and Products,FOO,FOOD
+Agriculture and Marine Resources and Products,SEA,RESOURCES OF THE SEA FISHERIES
+Agriculture and Marine Resources and Products,ABI,AGRICULTURAL BIOTECHNOLOGY
+Agriculture and Marine Resources and Products,WAT,WATER RESOURCES AND MANAGEMENT
+Measurements and Standards,MEA,MEASUREMENT METHODS
+Measurements and Standards,REF,REFERENCE MATERIALS
+Measurements and Standards,STA,STANDARDS
+Measurements and Standards,PMM,PROJECT MANAGEMENT METHODOLOGIES
+Protecting Man and his Environment,SAF,SAFETY
+Protecting Man and his Environment,ENV,ENVIRONMENTAL PROTECTION
+Protecting Man and his Environment,RAD,RADIATION PROTECTION
+Protecting Man and his Environment,WAS,WASTE MANAGEMENT
+Protecting Man and his Environment,RWA,RADIOACTIVE WASTE
+Protecting Man and his Environment,SDT,SUSTAINABLE DEVELOPMENT
+Protecting Man and his Environment,CLC,CLEAN COAL TECHNOLOGIES
+Protecting Man and his Environment,CCC,CLIMATE CHANGE AND CARBON CYCLE RESEARCH
+Social and Economic Concerns,SOC,SOCIAL ASPECTS
+Social and Economic Concerns,EDU,EDUCATION TRAINING
+Social and Economic Concerns,INF,INFORMATION MEDIA
+Social and Economic Concerns,ECO,ECONOMIC ASPECTS
+Social and Economic Concerns,REG,REGIONAL DEVELOPMENT
+Social and Economic Concerns,EMP,EMPLOYMENT ISSUES
+Social and Economic Concerns,SEC,SECURITY
+RTD Horizontal Topics,POL,POLICIES
+RTD Horizontal Topics,LEG,LEGISLATION  REGULATIONS
+RTD Horizontal Topics,FOR,FORECASTING
+RTD Horizontal Topics,EVA,EVALUATION
+RTD Horizontal Topics,ITT,INNOVATION  TECHNOLOGY TRANSFER
+RTD Horizontal Topics,COO,COORDINATION COOPERATION
+RTD Horizontal Topics,SCI,SCIENTIFIC RESEARCH
+RTD Horizontal Topics,BUS,BUSINESS ASPECTS
+RTD Horizontal Topics,ETH,RESEARCH ETHICS
+RTD Horizontal Topics,IPR,INTELLECTUAL PROPERTY RIGHTS
