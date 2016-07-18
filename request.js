@@ -186,6 +186,79 @@ db.programmeAgreg.find().forEach(function(data) {
     );
 });
 
+print("Aggregation des programmes");
+db.programmeDateAgreg.drop();
+db.project.aggregate([
+    {
+        $unwind : "$years"
+    },{
+    
+    $group: {
+        _id: {programme:"$programme",year:"$years"},
+        count: {
+            $sum: 1
+        },
+        totalCost: {
+            $sum: '$totalCost'
+        },
+        avgTotalCost: {
+            $avg: '$totalCost'
+        },
+        stdDevTotalCost: {
+            $stdDevPop: '$totalCost'
+        },
+        minTotalCost: {
+            $min: '$totalCost'
+        },
+        maxTotalCost: {
+            $max: '$totalCost'
+        },
+        ecMaxContribution: {
+            $sum: '$ecMaxContribution'
+        },
+        avgEcMaxContribution: {
+            $avg: '$ecMaxContribution'
+        },
+        stdDevEcMaxContribution: {
+            $stdDevPop: '$ecMaxContribution'
+        },
+        minEcMaxContribution: {
+            $min: '$ecMaxContribution'
+        }
+        ,
+        maxEcMaxContribution: {
+            $max:  '$ecMaxContribution'  
+        }
+    }
+}, {
+    $sort: {
+        count: -1
+    }
+}, {
+    $lookup: {
+        from: "programme",
+        localField: "_id.programme",
+        foreignField: "Code",
+        as: "programeDesc"
+    }
+}, {
+        $unwind : "$programeDesc"
+    },
+    { $match : {"programeDesc.Language":"fr"} 
+     }
+,{$out: "programmeDateAgreg" }]);
+
+
+print("Les Programmes");
+print("Annee,Code,Titre,Effectif,CoutTotal,TotalMoyen,TotalEcartType,TotalMin,TotalMax,ContributionTotal,ContributionMoyenne,ContributionEcartType,ContributionMin,ContributionMax");
+db.programmeDateAgreg.find().forEach(function(data) {
+    print(data._id.year + "," +data._id.programme + ",\"" + data.programeDesc.ShortTitle.replace('"', "'").replace('"', "'") + "\"," + data.count + "," + 
+    data.totalCost + "," + data.avgTotalCost + "," + data.stdDevTotalCost + "," + data.minTotalCost + "," + data.maxTotalCost + "," +
+    data.ecMaxContribution + "," + data.avgEcMaxContribution + "," + data.stdDevEcMaxContribution + "," + data.minEcMaxContribution + "," + data.maxEcMaxContribution 
+
+    );
+});
+
 //Aggregation par pays participants
 print("Aggregation par pays participants");
 
