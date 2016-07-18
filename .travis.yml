@@ -1,3 +1,5 @@
+language: r
+cache: packages
 env:
   global:
     - MONGODB_VERSION=3.2.8
@@ -13,3 +15,4 @@ before_script:
   - bash import.sh
   - mongo request.js
   - bash export.sh
+  - Rscript graph.R
