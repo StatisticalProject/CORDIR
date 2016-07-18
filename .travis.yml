@@ -16,3 +16,8 @@ before_script:
   - mongo request.js
   - bash export.sh
   - Rscript graph.R
+
+install:
+  - Rscript -e 'install.packages(c("devtools","roxygen2","testthat"));devtools::install_deps("RPackage")'
+script:
+  - Rscript -e 'devtools::check("RPackage")'
