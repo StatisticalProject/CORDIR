@@ -102,23 +102,15 @@ db.project.mapReduce(mapTopics,reduceTopics
     }
 );
 db.topicLists.find().count();
-db.topicLists.find().sort({value:-1}).forEach(function(data) {
+//Sauvegarde dans un csv
+print("topics,effectif");    
+db.topicLists.find().limit(30).sort({value:-1}).forEach(function(data) {
     print(data._id + "," + data.value );
 });
 
-//Les trentes premiers projets
-print("Les 30 premiers Projets");
-
-db.subjCodeAgreg.find().limit(30).forEach(function(data) {
-    print( data._id + "," + data.subjectCode.Title + "," + data.count + "," + 
-    data.totalCost + "," + data.avgTotalCost + "," + data.stdDevTotalCost + "," + data.minTotalCost + "," + data.maxTotalCost + "," +
-    data.call + "," + data.avgCall + "," + data.stdDevCall + "," + data.minCall + "," + data.maxCall 
-
-    );
-});
 
 //trie des projets par cout
-print("Les 30 premiers Topics");
+print("Les projets par cout");
 print("Titres,Effectif,Contribution");
 db.project.find({totalCost:{$gt:5000000}}).sort({totalCost:-1}).limit(30).forEach(function(data) {
     print(data.title + "," + data.totalCost + "," + data.ecMaxContribution);
