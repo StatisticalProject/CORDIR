@@ -1,24 +1,4 @@
-/*
-db.activityType.drop();
-db.brief.drop();
-db.country.drop();
-db.fundingScheme.drop();
-db.organization.drop();
-db.programme.drop();
-db.project.drop();
-db.sicCode.drop();
-db.subjects.drop();
-
-var txtFile = "test.txt";
-var file = new File(txtFile);
-var str = "My string of text";
-
-file.open("w"); // open file with write access
-file.writeln("First line of text");
-file.writeln("Second line of text " + str);
-file.write(str);
-file.close();
-*/
+//Connection 
 db = connect("cordir")
 
 //Changement des chaines en liste
@@ -186,7 +166,7 @@ db.programmeAgreg.find().forEach(function(data) {
     );
 });
 
-print("Aggregation des programmes");
+print("Aggregation des programmes par annee");
 db.programmeDateAgreg.drop();
 db.project.aggregate([
     {

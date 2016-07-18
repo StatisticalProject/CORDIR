@@ -12,3 +12,4 @@ before_script:
   - mongo clean.js
   - bash import.sh
   - mongo request.js
+  - bash export.sh
