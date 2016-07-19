@@ -27,4 +27,4 @@ install:
   - Rscript -e 'install.packages(c("devtools","roxygen2","testthat"))'
 script:
   - Rscript graph.R
-  - bash sparo.sh
+  - bash sparko.sh
