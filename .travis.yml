@@ -11,6 +11,7 @@ before_script:
   - wget http://d3kbcqa49mib13.cloudfront.net/spark-1.6.2-bin-hadoop2.6.tgz
   - wget https://oss.sonatype.org/content/repositories/releases/org/mongodb/mongodb-driver/3.3.0/mongodb-driver-3.3.0.jar
   - wget http://search.maven.org/remotecontent?filepath=org/mongodb/mongo-hadoop/mongo-hadoop-core/1.5.2/mongo-hadoop-core-1.5.2.jar -O mongo-hadoop-core-1.5.2.jar
+  - wget https://oss.sonatype.org/content/repositories/releases/org/mongodb/mongo-java-driver/3.3.0/mongo-java-driver-3.3.0.jar
   - tar xfz mongodb-linux-x86_64-$MONGODB_VERSION.tgz
   - tar -xzf spark-1.6.2-bin-hadoop2.6.tgz
   - export PATH=`pwd`/mongodb-linux-x86_64-$MONGODB_VERSION/bin:$PATH
