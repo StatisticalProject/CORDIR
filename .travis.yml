@@ -1,7 +1,13 @@
 language: 
   - r
   - java
-cache: packages
+
+jdk:
+  - oraclejdk8
+
+cache: 
+  - packages
+  - deps
 env:
   global:
     - MONGODB_VERSION=3.2.8
