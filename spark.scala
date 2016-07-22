@@ -22,7 +22,7 @@ import org.apache.spark.mllib.regression._
 import org.apache.spark.rdd._
 
 
-val mongoConfig = new Configuration()
+@transient val mongoConfig = new Configuration()
 mongoConfig.set("mongo.input.uri",
     "mongodb://localhost:27017/cordir.project")
 val documents = sc.newAPIHadoopRDD(
@@ -31,11 +31,18 @@ val documents = sc.newAPIHadoopRDD(
     classOf[Object],            // Key type
     classOf[BSONObject])        // Value type
 
-    
-val stopWordsIn = sc.broadcast(ParseWikipedia.loadStopWords("deps/lsa/src/main/resources/stopwords.txt")).value
-val numTerms = 500
-val k = 30 // nombre de valeurs singuliers à garder
+:type documents 
+val stopWords = sc.broadcast(ParseWikipedia.loadStopWords("deps/lsa/src/main/resources/stopwords.txt")).value
+var lemmatized = documents.map(s=> (s._2.get("_id").toString,ParseWikipedia.plainTextToLemmas(s._2.get("objective").toString, stopWords, ParseWikipedia.createNLPPipeline())))
+val numTerms = 1000
+val k = 100 // nombre de valeurs singuliers à garder
 val nbConcept = 30
+
+val filtered = lemmatized.filter(_._2.size > 1)
+val documentSize=documents.collect().length
+println("Documents Size : "+documentSize)
+println("Number of Terms : "+numTerms)
+val (termDocMatrix, termIds, docIds, idfs) = ParseWikipedia.termDocumentMatrix(filtered, stopWords, numTerms, sc)
 
 
 exit

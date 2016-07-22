@@ -181,8 +181,8 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <hadoop.version>2.6.0</hadoop.version>
     <java.version>1.7</java.version>
-    <scala.minor.version>2.11</scala.minor.version>
-    <scala.complete.version>${scala.minor.version}.4</scala.complete.version>
+    <scala.minor.version>2.10</scala.minor.version>
+    <scala.complete.version>${scala.minor.version}.5</scala.complete.version>
     <spark.version>1.6.2</spark.version>
   </properties>
 
