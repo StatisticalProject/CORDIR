@@ -22,7 +22,7 @@ before_script:
   - bash import.sh
   - mongo request.js
   - bash export.sh
-  - cd deps;mvn install
+  - cd deps;mvn install;cd ..
 
 install:
   - Rscript -e 'install.packages(c("devtools","roxygen2","testthat"))'
