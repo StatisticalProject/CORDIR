@@ -16,16 +16,16 @@ before_script:
   - tar -xzf spark-1.6.2-bin-hadoop2.6.tgz
   - export PATH=`pwd`/mongodb-linux-x86_64-$MONGODB_VERSION/bin:$PATH
   - mkdir -p data/db
-  - mongod --dbpath=data/db &
+  - mongod --dbpath=data/db & > allout.txt 2>&1
   - sleep 15
-  - mongo clean.js
-  - bash import.sh
-  - mongo request.js
-  - bash export.sh
-  - cd deps;mvn install;cd ..
+  - mongo clean.js >> allout.txt 2>&1
+  - bash import.sh >> allout.txt 2>&1
+  - mongo request.js >> allout.txt 2>&1
+  - bash export.sh >> allout.txt 2>&1
+  - cd deps;mvn install;cd .. >> allout.txt 2>&1
 
 install:
-  - Rscript -e 'install.packages(c("devtools","roxygen2","testthat"))'
+  - Rscript -e 'install.packages(c("devtools","roxygen2","testthat"))'  >> allout.txt 2>&1
 script:
-  - Rscript graph.R
-  - bash sparko.sh
+  - Rscript graph.R  >> allout.txt 2>&1
+  - bash sparko.sh  >> allout.txt 2>&1
