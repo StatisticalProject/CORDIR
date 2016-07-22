@@ -22,7 +22,8 @@ before_script:
   - bash import.sh >> allout.txt 2>&1
   - mongo request.js >> allout.txt 2>&1
   - bash export.sh >> allout.txt 2>&1
-  - cd deps;mvn install;cd .. >> allout.txt 2>&1
+  - cd deps;mvn install >> allout.txt 2>&1 
+  - cd .. 
 
 install:
   - Rscript -e 'install.packages(c("devtools","roxygen2","testthat"))'  >> allout.txt 2>&1
