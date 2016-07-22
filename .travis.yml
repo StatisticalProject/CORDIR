@@ -22,7 +22,7 @@ before_script:
   - bash import.sh >> allout.txt 2>&1
   - mongo request.js >> allout.txt 2>&1
   - bash export.sh >> allout.txt 2>&1
-  - cd deps;mvn install >> allout.txt 2>&1 
+  - cd deps;mvn -q install  
   - cd .. 
 
 install:
