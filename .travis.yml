@@ -24,6 +24,7 @@ before_script:
   - mkdir -p data/db
   - mongod --dbpath=data/db & > allout.txt 2>&1
   - sleep 15
+  - java --version
   - mongo clean.js >> allout.txt 2>&1
   - bash import.sh >> allout.txt 2>&1
   - mongo request.js >> allout.txt 2>&1
