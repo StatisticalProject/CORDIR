@@ -22,7 +22,7 @@ before_script:
   - tar -xzf spark-1.6.2-bin-hadoop2.6.tgz
   - export PATH=`pwd`/mongodb-linux-x86_64-$MONGODB_VERSION/bin:$PATH
   - mkdir -p data/db
-  - mongod --dbpath=data/db & > allout.txt 2>&1
+  - mongod --dbpath=data/db  > allout.txt 2>&1 &
   - sleep 15
   - "sudo apt-get purge openjdk*"
   - "sudo apt-get clean"
@@ -44,4 +44,4 @@ install:
   - Rscript -e 'install.packages(c("devtools","roxygen2","testthat"))'  >> allout.txt 2>&1
 script:
   - Rscript graph.R  >> allout.txt 2>&1
-  - bash sparko.sh  >> allout.txt 2>&1
+  - bash sparko.sh  
