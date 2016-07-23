@@ -43,6 +43,61 @@ val documentSize=documents.collect().length
 println("Documents Size : "+documentSize)
 println("Number of Terms : "+numTerms)
 val (termDocMatrix, termIds, docIds, idfs) = ParseWikipedia.termDocumentMatrix(filtered, stopWords, numTerms, sc)
+sc.parallelize(idfs.toSeq).saveAsTextFile("idf_"+name)
+  val mat = new RowMatrix(termDocMatrix)
 
+  val svd = mat.computeSVD(k, computeU=true)
+  val topConceptTerms = RunLSA.topTermsInTopConcepts(svd, nbConcept, numTerms, termIds)
+  val topConceptDocs = RunLSA.topDocsInTopConcepts(svd, nbConcept, documentSize, docIds)
+
+  var all=sc.emptyRDD[(String,Double)]
+  import collection.mutable.HashMap
+  val docConcept = new HashMap[String,ListBuffer[Double]]()
+  var count=0
+  for ( a <- topConceptDocs) {
+    count+=1
+    for ( (b,c) <- a) {
+      if (!docConcept.contains(b)) {
+        docConcept.put(b, new ListBuffer[Double]())
+      }
+      docConcept(b) += c
+    }
+    for((k,v) <- docConcept){
+      while(v.size<count){
+        v+=0.0
+      }
+    }
+  }
+  //Add notes
+
+
+  var docConceptRDD=sc.parallelize(docConcept.toSeq)
+  
+
+var toWrite=docConceptRDD.map(a => (a._1, a._2.toArray.mkString(",")))
+toWrite.coalesce(1,true).saveAsTextFile("docConceptLSAWithLabel")
+	
+//make labeled point
+
+val termConcept = new HashMap[String,ListBuffer[Double]]()
+count=0
+for ( a <- topConceptTerms) {
+    count+=1
+    for ( (b,c) <- a) {
+      if (!termConcept.contains(b)) {
+        termConcept.put(b, new ListBuffer[Double]())
+      }
+      termConcept(b) += c
+    }
+    for((k,v) <- termConcept){
+      while(v.size<count){
+        v+=0.0
+      }
+    }
+  }
+var parr=sc.parallelize(termConcept.toSeq)
+parr.map(a => (a._1,a._2.toArray.mkString(","))).coalesce(1,true).saveAsTextFile("termConceptLSA")
+
+  
 
 exit
