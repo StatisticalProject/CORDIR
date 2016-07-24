@@ -24,7 +24,7 @@ import org.apache.spark.rdd._
 
 @transient val mongoConfig = new Configuration()
 mongoConfig.set("mongo.input.uri",
-    "mongodb://localhost:27017/cordir.project")
+    "mongodb://localhost:27017/cordir.brief")
 val documents = sc.newAPIHadoopRDD(
     mongoConfig,                // Configuration
     classOf[MongoInputFormat],  // InputFormat
@@ -33,7 +33,7 @@ val documents = sc.newAPIHadoopRDD(
 
 :type documents 
 val stopWords = sc.broadcast(ParseWikipedia.loadStopWords("deps/lsa/src/main/resources/stopwords.txt")).value
-var lemmatized = documents.map(s=> (s._2.get("_id").toString,ParseWikipedia.plainTextToLemmas(s._2.get("objective").toString, stopWords, ParseWikipedia.createNLPPipeline())))
+var lemmatized = documents.map(s=> (s._2.get("_id").toString,ParseWikipedia.plainTextToLemmas(s._2.get("article").toString, stopWords, ParseWikipedia.createNLPPipeline())))
 val numTerms = 1000
 val k = 100 // nombre de valeurs singuliers à garder
 val nbConcept = 30
@@ -45,14 +45,15 @@ println("Number of Terms : "+numTerms)
 val (termDocMatrix, termIds, docIds, idfs) = ParseWikipedia.termDocumentMatrix(filtered, stopWords, numTerms, sc)
 
 val outputConfig = new Configuration()
-outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordir.projetIdfs")
+outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordir.briefIdfs")
 sc.parallelize(idfs.toSeq).saveAsNewAPIHadoopFile("file:///this-is-completely-unused",classOf[Object],classOf[BSONObject],classOf[MongoOutputFormat[Object, BSONObject]],outputConfig)
-outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordir.projetTermDocMatrix")
+outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordir.briefTermDocMatrix")
 termDocMatrix.zipWithIndex().map(a => (a._2,a._1.toArray)).saveAsNewAPIHadoopFile("file:///this-is-completely-unused",classOf[Object],classOf[BSONObject],classOf[MongoOutputFormat[Object, BSONObject]],outputConfig)
-outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordir.projetTermIds")
+outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordir.briefTermIds")
 sc.parallelize(termIds.toSeq).saveAsNewAPIHadoopFile("file:///this-is-completely-unused",classOf[Object],classOf[BSONObject],classOf[MongoOutputFormat[Object, BSONObject]],outputConfig)
-outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordir.projetDocIds")
+outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordir.briefDocIds")
 sc.parallelize(docIds.toSeq).saveAsNewAPIHadoopFile("file:///this-is-completely-unused",classOf[Object],classOf[BSONObject],classOf[MongoOutputFormat[Object, BSONObject]],outputConfig)
+
 
   val mat = new RowMatrix(termDocMatrix)
 
@@ -87,7 +88,7 @@ var toWrite=docConceptRDD.map(a => (a._1, a._2.toArray))
 
 val outputConfig = new Configuration()
   outputConfig.set("mongo.output.uri",
-    "mongodb://localhost:27017/cordir.projetDocConcept")
+    "mongodb://localhost:27017/cordir.briefDocConcept")
 toWrite.saveAsNewAPIHadoopFile(
     "file:///this-is-completely-unused",
     classOf[Object],
@@ -116,7 +117,7 @@ for ( a <- topConceptTerms) {
   }
 var parr=sc.parallelize(termConcept.toSeq)
 val outputConfig = new Configuration()
-outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordir.projetTermConcept")
+outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordir.briefTermConcept")
 parr.map(a => (a._1,a._2.toArray)).coalesce(1,true).saveAsNewAPIHadoopFile("file:///this-is-completely-unused",classOf[Object],classOf[BSONObject],classOf[MongoOutputFormat[Object, BSONObject]],outputConfig)
 
   
