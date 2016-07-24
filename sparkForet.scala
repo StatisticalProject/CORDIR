@@ -41,14 +41,23 @@ val documentsDocConcept = sc.newAPIHadoopRDD(
     classOf[Object],            // Key type
     classOf[BSONObject])        // Value type
 
-:type documents 
 def mergeBSON( a:BSONObject, b:BSONObject ) : BSONObject = {
       a.putAll(b)
       return a
 }
+
+def generateArray( a:BasicDBList ) : Array[Double] = {
+    var ree:Array[Double] =Array.fill[Double](a.size())(0)
+      for(i <- 0 to a.size()-1){
+          ree(i)=a.get(i).asInstanceOf[Double]
+      }
+      return ree
+}
+
+
 var joinedDocuments=documents.map(a=>(a._1.toString,a._2)).join(documentsDocConcept.map(a=>(a._1.toString,a._2))).map(a => (a._1,mergeBSON(a._2._1,a._2._2)))
 //joinedDocuments.map(a => (a._1,mergeBSON(a._2._1,a._2._2))).take(1).foreach(println)
-val data=joinedDocuments.map(a => LabeledPoint(a._2.get("totalCost").asInstanceOf[Double],new DenseVector(a._2.get("value").asInstanceOf[BasicDBList].toArray.asInstanceOf[Array[Double]])))
+val data=joinedDocuments.map(a => LabeledPoint(a._2.get("totalCost").asInstanceOf[Double],new DenseVector(generateArray(a._2.get("value").asInstanceOf[BasicDBList]))))
 val splits = data.randomSplit(Array(0.7, 0.3))
 val (trainingData, testData) = (splits(0), splits(1))
 
@@ -56,11 +65,11 @@ val (trainingData, testData) = (splits(0), splits(1))
 // Empty categoricalFeaturesInfo indicates all features are continuous.
 val numClasses = 2
 val categoricalFeaturesInfo = Map[Int, Int]()
-val numTrees = 3 // Use more in practice.
+val numTrees = 1000// Use more in practice.
 val featureSubsetStrategy = "auto" // Let the algorithm choose.
 val impurity = "variance"
-val maxDepth = 4
-val maxBins = 32
+val maxDepth = 10
+val maxBins = 64
 
 val model = RandomForest.trainRegressor(trainingData, categoricalFeaturesInfo,
   numTrees, featureSubsetStrategy, impurity, maxDepth, maxBins)
@@ -72,7 +81,7 @@ val labelsAndPredictions = testData.map { point =>
 }
 val testMSE = labelsAndPredictions.map{ case(v, p) => math.pow((v - p), 2)}.mean()
 println("Test Mean Squared Error = " + testMSE)
-println("Learned regression forest model:\n" + model.toDebugString)
+//println("Learned regression forest model:\n" + model.toDebugString)
 
 // Save and load model
 model.save(sc, "target/tmp/myRandomForestRegressionModel")
