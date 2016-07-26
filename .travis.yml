@@ -44,4 +44,3 @@ install:
   - Rscript -e 'install.packages(c("devtools","roxygen2","testthat"))'  >> allout.txt 2>&1
 script:
   - Rscript graph.R  >> allout.txt 2>&1
-  - bash sparko.sh  
