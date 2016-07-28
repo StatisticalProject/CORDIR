@@ -46,7 +46,7 @@ db.project.aggregate([{
     }
 }, {
     $sort: {
-        count: -1
+        totalCost: -1
     }
 }]);
 var maxVal=280086352.0;
@@ -90,4 +90,6 @@ db.project.aggregate([{
 },{$out: "totalCostAgreg" }]);
 db.totalCostAgreg.find().forEach(function(data) {
     print(data._id.totalCostFlag + "," + data._id.totalCostFlagMean +"," + data._id.totalCostFlagInt + "," + data.count );
-});        
+});        
+
+db.project.find().sort({totalcost:-1})
