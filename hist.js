@@ -52,12 +52,13 @@ db.project.aggregate([{
 var maxVal=280086352.0;
 db.eval(function() { 
 db.project.find({}).forEach(function(el) {
-    var maxVal=2308257.14168001+2*4721538.09920443;
+    var maxVal=2308257.14168001+4721538.09920443;
     var count=100;
     for (var i = 0; i < count; i++) {
         j=i+1;
         if(el.totalCost<j*maxVal/count){
             el.totalCostFlag=parseInt(i*maxVal/count)+"-"+parseInt(j*maxVal/count);
+            el.totalCostFlagMean=0.5*(j+i)*maxVal/count;
             el.totalCostFlagInt=i;
             db.project.save(el);
             return;
@@ -65,13 +66,19 @@ db.project.find({}).forEach(function(el) {
     }
     el.totalCostFlag=">"+parseInt(j*maxVal/count)
     el.totalCostFlagInt=count;
+    el.totalCostFlagMean=(280086352+maxVal)*0.5;
     db.project.save(el);
             
 })
- });
+ });
+db.totalCostAgreg.drop(); 
 db.project.aggregate([{
     $group: {
-        _id: ["$totalCostFlag","$totalCostFlagInt"],
+        _id: {
+            "totalCostFlag": "$totalCostFlag",
+            "totalCostFlagMean": "$totalCostFlagMean",
+            "totalCostFlagInt": "$totalCostFlagInt"
+        },
         count: {
             $sum: 1
         }
@@ -80,5 +87,7 @@ db.project.aggregate([{
     $sort: {
         count: -1
     }
-}]);
-        
+},{$out: "totalCostAgreg" }]);
+db.totalCostAgreg.find().forEach(function(data) {
+    print(data._id.totalCostFlag + "," + data._id.totalCostFlagMean +"," + data._id.totalCostFlagInt + "," + data.count );
+});        
