@@ -92,4 +92,45 @@ db.totalCostAgreg.find().forEach(function(data) {
     print(data._id.totalCostFlag + "," + data._id.totalCostFlagMean +"," + data._id.totalCostFlagInt + "," + data.count );
 });        
 
-db.project.find().sort({totalcost:-1})
+db.project.find().sort({totalcost:1}).skip(25607/4).limit(1)
+db.project.find().sort({totalcost:1}).skip(2*25607/4).limit(1)
+db.project.find().sort({totalcost:1}).skip(3*25607/4).limit(1)
+
+
+db.project.createIndex( { totalcost: 1 } )
+
+db.eval(function() { 
+db.project.find({}).forEach(function(el) {
+    if(el.totalCost<500000){
+       el.catCost="<500k"
+       el.catCostNum=0 
+    }else
+    if(el.totalCost<2800000){
+       el.catCost="500k-2800k"
+       el.catCostNum=1 
+    }else
+    if(el.totalCost<8000000){
+       el.catCost="2800k-8M"
+       el.catCostNum=2 
+    }else{
+       el.catCost=">8M"
+       el.catCostNum=3 
+    }
+    db.project.save(el);
+            
+})
+ });
+ 
+db.project.aggregate([{
+    $group: {
+        _id: "$catCost",
+        count: {
+            $sum: 1
+        }
+    }
+}, {
+    $sort: {
+        count: -1
+    }
+}]);
+ 
