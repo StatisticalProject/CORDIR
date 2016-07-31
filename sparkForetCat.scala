@@ -106,7 +106,7 @@ val (trainingData, testData) = (splits(0), splits(1))
 
 val numClasses = 4
 val categoricalFeaturesInfo = Map[Int, Int]((0,23),(1,84))
-val numTrees = 100 // Use more in practice.
+val numTrees = 100  // Use more in practice.
 val featureSubsetStrategy = "auto" // Let the algorithm choose.
 val impurity = "gini"
 val maxDepth = 15
