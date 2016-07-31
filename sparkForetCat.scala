@@ -109,7 +109,7 @@ val categoricalFeaturesInfo = Map[Int, Int]((0,23),(1,84))
 val numTrees = 100 // Use more in practice.
 val featureSubsetStrategy = "auto" // Let the algorithm choose.
 val impurity = "gini"
-val maxDepth = 20
+val maxDepth = 15
 val maxBins = 84
 
 
