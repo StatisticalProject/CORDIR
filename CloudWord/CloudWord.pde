@@ -1,41 +1,70 @@
- import java.util.Set;
+ import java.util.*;
 String datesSBar[];
 String conceptSBar[];
-String yearSelected="2009",yearHover="2006";
-String conceptSelected="8",conceptHover="10";
+String selectionSBar[];
+String yearSelected="2009";
+String conceptSelected="1";
 Table tableConcept;
 String poloo="";
 String poloo2="";
 HashMap<String,HashMap<String,Float[]>> wordByYear=new HashMap();
 ArrayList<TermForce> termsForce=new ArrayList();
+String nbSelect="100";
 MaxSize max= new MaxSize();
 void setup() {
   background(255);
-  size(800, 600);
+  size(1024, 768);
   initTable(); //<>//
   initScrollBar();
   //termsForce.add(new TermForce("test",10.0,(int)random(width),(int)random(height),max));
   //termsForce.add(new TermForce("teste",0.2,(int)random(width),(int)random(height),max));
-  termsForce=generateTermForce(yearSelected,conceptSelected);
+  termsForce=generateTermForce(yearSelected,conceptSelected,nbSelect);
   arrange(termsForce); 
 }
 
 void draw() {
   background(255);
-  drawScroll();
+  
   drawSpirale();
+  drawScroll();
 }
 
-ArrayList<TermForce> generateTermForce(String year,String concept){
+ArrayList<TermForce> generateTermForce(String year,String concept,String nbSelect){
+  max=new MaxSize();
+  int nbSel=Integer.parseInt(nbSelect);
   ArrayList<TermForce> ters=new ArrayList();
   int conInt=Integer.parseInt(concept);
   HashMap<String,Float[]> wordsDouble=wordByYear.get(year);
   Set<String> words=wordsDouble.keySet();
   for(String word:words){
     float val=wordsDouble.get(word)[conInt-1];
+    max.max=max(max.max,val);
+    max.min=min(max.min,val);
     ters.add(new TermForce(word,val,(int)random(width),(int)random(height),max));
   }
-  return ters;
+  double nbSelCal=min(nbSel,ters.size());
+  float nia=(float)(width*height/(textWidth("demonstration")*nbSelCal));
+  //max.min=0.2*max.max;
+  max.fontMax=min(40,nia*0.14);
+  max.fontMin=1;
+  
+  Collections.sort(ters,
+        new Comparator<TermForce>(){
+          public int compare(TermForce o1, TermForce o2){
+            return o1.compareTo(o2);
+        }
+      });
+  ArrayList<TermForce> tersRe=new ArrayList();
+      
+  for(int i=0;i<min(ters.size(),nbSel);i++)
+  {
+    tersRe.add(ters.get(i));
+    float val=ters.get(i).value;
+    max.max=max(max.max,val);
+    max.min=min(max.min,val);
+  
+  }
+  return tersRe;
 }
 void drawSpirale(){
   for(TermForce ter:termsForce)
@@ -45,14 +74,16 @@ void drawSpirale(){
 }
 
 void drawScroll(){
-  int sliderW=(int)(width*0.8);
+  int sliderW=(int)(height*0.8);
   String prevYear=yearSelected;
   String prevConcept=conceptSelected;
-  
-  yearSelected=drawScrollBar(width/10,50,sliderW,datesSBar,yearSelected);
-  conceptSelected=drawScrollBar(width/10,80,sliderW,conceptSBar,conceptSelected);
-  if(!prevYear.equals(yearSelected)||!prevConcept.equals(conceptSelected)){
-    termsForce=generateTermForce(yearSelected,conceptSelected);
+  String prevSel=nbSelect;
+  yearSelected=drawScrollBar(50,50,sliderW,datesSBar,yearSelected);
+  conceptSelected=drawScrollBar(10,50,sliderW,conceptSBar,conceptSelected);
+  sliderW=(int)(height*0.4);
+  nbSelect=drawScrollBar(110,50,sliderW,selectionSBar,nbSelect);
+  if(!prevYear.equals(yearSelected)||!prevConcept.equals(conceptSelected)||!prevSel.equals(nbSelect)){
+    termsForce=generateTermForce(yearSelected,conceptSelected,nbSelect);
     arrange(termsForce); 
   }
 }
@@ -74,7 +105,7 @@ void initTable(){
       doubleCon[i]=Float.parseFloat(con[i]);
     }
     if(!wordByYear.containsKey(year)){
-      wordByYear.put(year,new HashMap());
+      wordByYear.put(year,new LinkedHashMap());
     }
     wordByYear.get(year).put(word,doubleCon);
     
@@ -90,21 +121,23 @@ void initScrollBar(){
   for (int i=0;i<20;i++){
      conceptSBar[i]=Integer.toString(i+1);
   }
+  selectionSBar=new String[]{"20","50","100","200","500","1000"};
 }
 
-String drawScrollBar( int x,int y,int w,String []list,String selection){
+String drawScrollBar( int x,int y,int h,String []list,String selection){
    textSize(12);
-  int baseW=(int)Math.rint(w/list.length);
-  line(x, y, x+w-baseW, y);
+  int baseW=(int)Math.rint(h/list.length);
+  line(x, y, x, y+h-baseW);
   String select=selection;
   for (int i=0;i<list.length;i++){
       String name=list[i];
-      int xCoo=x+i*baseW;
-      double txtSize=textWidth(name)*0.5;
-      boolean hover=mouseX>xCoo-txtSize&&mouseX<xCoo+txtSize+5&&
-      mouseY>y-35&&mouseY<y+5;
+      int xCoo=x;
+      int yCoo=y+i*baseW;
+      double txtSize=textWidth(name);
+      boolean hover=mouseX>xCoo-5&&mouseX<xCoo+txtSize+15&&
+      mouseY>yCoo-10&&mouseY<yCoo+10;
       
-      drawTextIndex(xCoo,y,name,name.equals(selection),hover);
+      drawTextIndex(xCoo,yCoo,name,name.equals(selection),hover);
       if(mousePressed &&hover){
         select=name;
       }
@@ -118,18 +151,18 @@ void drawTextIndex(int baseX,int baseY,String text,boolean selected,boolean hov)
   }else{
     fill(0, 102, 153, 204);
   }
-  Float sText=(textWidth(text))*0.5;
+  Float sText= textAscent() * 0.9;
   if(!selected&&!hov){
     noFill();
   }
-  text(text, baseX-sText+5, baseY-12); 
-  triangle(baseX, baseY, baseX+6, baseY-7, baseX+12, baseY);
+  text(text, baseX+13, baseY+sText); 
+  triangle(baseX, baseY, baseX+6, baseY+6, baseX, baseY+12);
 }
 
 // calcule de la spirale des mots
 void arrange(ArrayList<TermForce>  arranging) {
      //cntre de la spirale
-    float cx=width/2,cy=height/2;
+    float cx=width/2+50,cy=height/2;
     //Eloignement et angle
     float R=0.0,dR=1.0,theta=0.0,dTheta=0.05;
     //bruit
