@@ -20,7 +20,7 @@ import org.apache.spark.mllib.linalg.distributed.RowMatrix
 import breeze.linalg.{DenseMatrix => BDenseMatrix, DenseVector => BDenseVector, SparseVector => BSparseVector}
 import org.apache.spark.mllib.regression._
 import org.apache.spark.rdd._
-
+import scala.collection.mutable.ArrayBuffer
 
 @transient val mongoConfig = new Configuration()
 mongoConfig.set("mongo.input.uri",
@@ -34,12 +34,13 @@ val documents = sc.newAPIHadoopRDD(
 
 var stopWords = sc.broadcast(ParseWikipedia.loadStopWords("deps/lsa/src/main/resources/stopwords.txt")).value
 
+
 for( year <- 2006 to 2022){
 var select=documents.filter(a=>a._2.get("years").asInstanceOf[List[Double]].contains(year.asInstanceOf[Double]))
     println( year+":"+select.count())
     if(select.count()>0){
         
-var lemmatized = documents.filter(a=>a._2.get("years").asInstanceOf[List[String]].contains(year)).map(s=> (s._2.get("_id").toString,ParseWikipedia.plainTextToLemmas(s._2.get("objective").toString, stopWords, ParseWikipedia.createNLPPipeline())))
+var lemmatized = select.map(s=> (s._2.get("_id").toString,ParseWikipedia.plainTextToLemmas(s._2.get("objective").toString, stopWords, ParseWikipedia.createNLPPipeline())))
 val numTerms = 1000
 val k = 100 // nombre de valeurs singuliers à garder
 val nbConcept = 30
@@ -80,7 +81,7 @@ val (termDocMatrix, termIds, docIds, idfs) = ParseWikipedia.termDocumentMatrix(f
 
 var docConceptRDD=sc.parallelize(docConcept.toSeq)
   
-var toWrite=docConceptRDD.map(a => ((a._1,year), a._2.toArray))
+var toWrite=docConceptRDD.map(a => (year.toString+":"+a._1, a._2.toArray))
 
 var outputConfig = new Configuration()
   outputConfig.set("mongo.output.uri",
@@ -114,7 +115,7 @@ for ( a <- topConceptTerms) {
 var parr=sc.parallelize(termConcept.toSeq)
 outputConfig = new Configuration()
 outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordir.projetTermConceptYear")
-parr.map(a => ((a._1,year),a._2.toArray)).coalesce(1,true).saveAsNewAPIHadoopFile("file:///this-is-completely-unused",classOf[Object],classOf[BSONObject],classOf[MongoOutputFormat[Object, BSONObject]],outputConfig)
+parr.map(a => (year.toString+":"+a._1, a._2.toArray)).coalesce(1,true).saveAsNewAPIHadoopFile("file:///this-is-completely-unused",classOf[Object],classOf[BSONObject],classOf[MongoOutputFormat[Object, BSONObject]],outputConfig)
     }
     }
   
