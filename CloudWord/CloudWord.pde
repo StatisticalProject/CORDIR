@@ -38,15 +38,13 @@ ArrayList<TermForce> generateTermForce(String year,String concept,String nbSelec
   Set<String> words=wordsDouble.keySet();
   for(String word:words){
     float val=wordsDouble.get(word)[conInt-1];
-    max.max=max(max.max,val);
-    max.min=min(max.min,val);
     ters.add(new TermForce(word,val,(int)random(width),(int)random(height),max));
   }
   double nbSelCal=min(nbSel,ters.size());
   float nia=(float)(width*height/(textWidth("demonstration")*nbSelCal));
   //max.min=0.2*max.max;
-  max.fontMax=min(40,nia*0.14);
-  max.fontMin=1;
+  max.fontMax=min(60,nia*0.6);
+  max.fontMin=max.fontMax*0.1;
   
   Collections.sort(ters,
         new Comparator<TermForce>(){
