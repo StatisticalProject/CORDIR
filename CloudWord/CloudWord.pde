@@ -2,7 +2,7 @@
 String datesSBar[];
 String conceptSBar[];
 String selectionSBar[];
-String yearSelected="2009";
+String yearSelected="Toutes";
 String conceptSelected="1";
 String poloo="";
 String poloo2="";
@@ -76,10 +76,10 @@ void drawScroll(){
   String prevYear=yearSelected;
   String prevConcept=conceptSelected;
   String prevSel=nbSelect;
-  yearSelected=drawScrollBar(50,50,sliderW,datesSBar,yearSelected);
-  conceptSelected=drawScrollBar(10,50,sliderW,conceptSBar,conceptSelected);
+  yearSelected=drawScrollBar("Année",65,50,sliderW,datesSBar,yearSelected);
+  conceptSelected=drawScrollBar("Concept",10,50,sliderW,conceptSBar,conceptSelected);
   sliderW=(int)(height*0.4);
-  nbSelect=drawScrollBar(110,50,sliderW,selectionSBar,nbSelect);
+  nbSelect=drawScrollBar("Effectif",125,50,sliderW,selectionSBar,nbSelect);
   if(!prevYear.equals(yearSelected)||!prevConcept.equals(conceptSelected)||!prevSel.equals(nbSelect)){
     termsForce=generateTermForce(yearSelected,conceptSelected,nbSelect);
     arrange(termsForce); 
@@ -108,7 +108,7 @@ void initTable(){
     wordByYear.get(year).put(word,doubleCon);
     
   }
-  tableConcept=loadTable("../projetTermConcept.csv"); //<>//
+  tableConcept=loadTable("../projetTermConcept.csv");
   for (TableRow row : tableConcept.rows()) {
     String word=row.getString(0);
     if(word.equals("_id")){
@@ -119,19 +119,19 @@ void initTable(){
     for(int i=0;i<con.length;i++){
       doubleCon[i]=Float.parseFloat(con[i]);
     }
-    if(!wordByYear.containsKey("TOTAL")){
-      wordByYear.put("TOTAL",new LinkedHashMap());
+    if(!wordByYear.containsKey("Toutes")){
+      wordByYear.put("Toutes",new LinkedHashMap());
     }
-    wordByYear.get("TOTAL").put(word,doubleCon);
+    wordByYear.get("Toutes").put(word,doubleCon);
     
   }
 }
 void initScrollBar(){
   int nb=2020-2006;
   datesSBar=new String[nb+1];
-  datesSBar[0]="TOTAL";
+  datesSBar[0]="Toutes";
   for (int i=1;i<nb+1;i++){
-     datesSBar[i]=Integer.toString(2006+i);
+     datesSBar[i]=Integer.toString(2006+i-1);
   }
   conceptSBar=new String[20];
   for (int i=0;i<20;i++){
@@ -140,7 +140,7 @@ void initScrollBar(){
   selectionSBar=new String[]{"20","50","100","200","500","1000"};
 }
 
-String drawScrollBar( int x,int y,int h,String []list,String selection){
+String drawScrollBar( String title, int x,int y,int h,String []list,String selection){
    textSize(12);
   int baseW=(int)Math.rint(h/list.length);
   line(x, y, x, y+h-baseW);
@@ -158,6 +158,8 @@ String drawScrollBar( int x,int y,int h,String []list,String selection){
         select=name;
       }
   }
+  noFill();
+  text(title, x-2, y-textAscent()+5);
   return select;
 }
 void drawTextIndex(int baseX,int baseY,String text,boolean selected,boolean hov){
