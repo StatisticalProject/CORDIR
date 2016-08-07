@@ -8,6 +8,7 @@ Table tableConcept;
 String poloo="";
 String poloo2="";
 HashMap<String,HashMap<String,Float[]>> wordByYear=new HashMap();
+HashMap<String,Color> colorByWord=new HashMap();
 ArrayList<TermForce> termsForce=new ArrayList();
 String nbSelect="100";
 MaxSize max= new MaxSize();
@@ -43,8 +44,8 @@ ArrayList<TermForce> generateTermForce(String year,String concept,String nbSelec
   double nbSelCal=min(nbSel,ters.size());
   float nia=(float)(width*height/(textWidth("demonstration")*nbSelCal));
   //max.min=0.2*max.max;
-  max.fontMax=min(60,nia*0.6);
-  max.fontMin=max.fontMax*0.1;
+  max.fontMax=min(70,nia*0.6);
+  max.fontMin=max.fontMax*0.15;
   
   Collections.sort(ters,
         new Comparator<TermForce>(){
@@ -110,7 +111,7 @@ void initTable(){
   }
 }
 void initScrollBar(){
-  int nb=2021-2006;
+  int nb=2020-2006;
   datesSBar=new String[nb];
   for (int i=0;i<nb;i++){
      datesSBar[i]=Integer.toString(2006+i);
@@ -162,21 +163,21 @@ void arrange(ArrayList<TermForce>  arranging) {
      //cntre de la spirale
     float cx=width/2+50,cy=height/2;
     //Eloignement et angle
-    float R=0.0,dR=1.0,theta=0.0,dTheta=0.05;
+    float R=0.0,dR=0.05,theta=0.0,dTheta=0.01;
     //bruit
-    float Rnoise=0.0,dRnoise=1.5;
+    float Rnoise=0.01,dRnoise=0.5;
       R=0.0;
       theta=0.0;
       ArrayList<TermForce>  bases = arranging;
       ArrayList<TermForce> arrayCalcul=new ArrayList();
       for(TermForce arrange:bases){
               R=0.0;
-        theta=random(100)/100;
+        theta=noise(1);
         arrange.calculateValue();
         arrange.calculateDisplay();
         int loop=0;
         do{
-          float radd=theta+(noise(Rnoise)*200)-100;
+          float radd=theta+(noise(Rnoise)*20)-10;
           arrange.x=(int)(cx+R*cos(radd));
           arrange.y=(int)(cy+R*sin(radd));
                     
@@ -219,7 +220,12 @@ class TermForce  {
     this.name=name;
     this.value=value;
     this.fontsize=max(4,min(20,map(value,0.0,1,max.fontMin,max.fontMax)));
-    this.colori=color(random(name.toCharArray()[0]),random(name.toCharArray()[0]),random(name.toCharArray()[0]));
+    if(!colorByWord.containsKey(name)){
+      Color colore=new Color();
+      colore.colore=color(random(name.toCharArray()[0]),random(name.toCharArray()[0]),random(name.toCharArray()[0]));
+      colorByWord.put(name,colore);
+    }
+    this.colori=colorByWord.get(name).colore;
     this.size=max;
     this.x=x;
     this.y=y;
@@ -279,4 +285,8 @@ class MaxSize{
   float min=0.0;
   float fontMax=50;
   float fontMin=1;
+}
+
+class Color{
+  color colore;
 }
