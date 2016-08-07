@@ -6,3 +6,5 @@ mongoexport --db cordir --collection countryCoorAgreg --fields _id,count,totalCo
 mongoexport --db cordir --collection subjCodeAgreg --fields _id,count,totalCost,avgTotalCost,stdDevTotalCost,minTotalCost,maxTotalCost,ecMaxContribution,avgEcMaxContribution,stdDevEcMaxContribution,minEcMaxContribution,maxEcMaxContribution,subjectCode.Group,subjectCode.Code,subjectCode.Title --type=csv --out subjCodeAgreg.csv
 
 mongoexport --db cordir --collection projetTermConceptYear --fields _id,value --type=csv --out projetTermConceptYear.csv
+
+mongoexport --db cordir --collection projetTermConcept --fields _id,value --type=csv --out projetTermConcept.csv

@@ -4,7 +4,6 @@ String conceptSBar[];
 String selectionSBar[];
 String yearSelected="2009";
 String conceptSelected="1";
-Table tableConcept;
 String poloo="";
 String poloo2="";
 HashMap<String,HashMap<String,Float[]>> wordByYear=new HashMap();
@@ -15,7 +14,7 @@ MaxSize max= new MaxSize();
 void setup() {
   background(255);
   size(1024, 768);
-  initTable(); //<>//
+  initTable();
   initScrollBar();
   //termsForce.add(new TermForce("test",10.0,(int)random(width),(int)random(height),max));
   //termsForce.add(new TermForce("teste",0.2,(int)random(width),(int)random(height),max));
@@ -88,7 +87,7 @@ void drawScroll(){
 }
 
 void initTable(){
-  tableConcept=loadTable("../projetTermConceptYear.csv");
+  Table tableConcept=loadTable("../projetTermConceptYear.csv");
   for (TableRow row : tableConcept.rows()) {
     String or[]=row.getString(0).split(":");
     String year = or[0];
@@ -98,7 +97,7 @@ void initTable(){
     }else{
       continue;
     }
-    String con[]=row.getString(1).substring(1,row.getString(1).length()-2).split(",");
+    String con[]=row.getString(1).substring(1,row.getString(1).length()-1).split(",");
     Float []doubleCon=new Float[con.length];
     for(int i=0;i<con.length;i++){
       doubleCon[i]=Float.parseFloat(con[i]);
@@ -109,11 +108,29 @@ void initTable(){
     wordByYear.get(year).put(word,doubleCon);
     
   }
+  tableConcept=loadTable("../projetTermConcept.csv"); //<>//
+  for (TableRow row : tableConcept.rows()) {
+    String word=row.getString(0);
+    if(word.equals("_id")){
+      continue;
+    }
+    String con[]=row.getString(1).substring(1,row.getString(1).length()-1).split(",");
+    Float []doubleCon=new Float[con.length];
+    for(int i=0;i<con.length;i++){
+      doubleCon[i]=Float.parseFloat(con[i]);
+    }
+    if(!wordByYear.containsKey("TOTAL")){
+      wordByYear.put("TOTAL",new LinkedHashMap());
+    }
+    wordByYear.get("TOTAL").put(word,doubleCon);
+    
+  }
 }
 void initScrollBar(){
   int nb=2020-2006;
-  datesSBar=new String[nb];
-  for (int i=0;i<nb;i++){
+  datesSBar=new String[nb+1];
+  datesSBar[0]="TOTAL";
+  for (int i=1;i<nb+1;i++){
      datesSBar[i]=Integer.toString(2006+i);
   }
   conceptSBar=new String[20];
@@ -222,7 +239,7 @@ class TermForce  {
     this.fontsize=max(4,min(20,map(value,0.0,1,max.fontMin,max.fontMax)));
     if(!colorByWord.containsKey(name)){
       Color colore=new Color();
-      colore.colore=color(random(name.toCharArray()[0]),random(name.toCharArray()[0]),random(name.toCharArray()[0]));
+      colore.colore=color(50+random(155),50+random(155),50+random(155));
       colorByWord.put(name,colore);
     }
     this.colori=colorByWord.get(name).colore;
