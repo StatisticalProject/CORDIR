@@ -147,5 +147,5 @@ var results=labelsAndPredictions.map(a=>((a._1,a._2),((a._1==a._2):Int,(a._1!=a.
 for (res <- results) {
     println(res)
 }
-
+model.save(sc, "randomForestClassificationModel")
 exit
