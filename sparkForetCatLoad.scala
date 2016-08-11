@@ -21,7 +21,7 @@ var mapper = new ObjectMapper();
 mapper.writeValue(new File("model.json"), smodel.trees());
 
 var f = new FileWriter("model.txt") 
-f.write(smodel.toDebugString())
+f.write(smodel.toDebugString)
 f.close() 
 
 exit
