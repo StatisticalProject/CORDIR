@@ -2,10 +2,39 @@ BufferedReader reader;
 String line;
 HashMap<String,Edge> map=new HashMap<String,Edge>(); 
 HashMap<String,Node> mapNode=new HashMap<String,Node>(); 
-
+ArrayList<String> mapWordConc=new ArrayList<String>();
 void setup() {
     background(255);
   size(1024, 768);
+  HashMap<String,ArrayList<Float>> wordByYear=new HashMap<String,ArrayList<Float>>();
+    
+  Table tableConcept=loadTable("../projetTermConcept.csv");
+  for (TableRow row : tableConcept.rows()) {
+    String word=row.getString(0);
+    if(word.equals("_id")){
+      continue;
+    }
+    String con[]=row.getString(1).substring(1,row.getString(1).length()-1).split(",");
+    ArrayList<Float>doubleCon=new ArrayList();
+    for(int i=0;i<con.length;i++){
+      doubleCon.add(Float.parseFloat(con[i]));
+    }
+    
+    wordByYear.put(word,doubleCon);
+    
+  }
+  for(int i=0;i<30;i++)
+  {
+    float max=Integer.MIN_VALUE;
+    String word="";
+    for (String wordRes:wordByYear.keySet()){
+      if(max<wordByYear.get(wordRes).get(i)){
+        max=wordByYear.get(wordRes).get(i);
+        word=wordRes;
+      }      
+    }
+    mapWordConc.add(word);
+  }
 
   // Open the file from the createWriter() example
   reader = createReader("../model.txt");
@@ -48,7 +77,11 @@ void setup() {
       
       String reste=nodeValue.substring(nodeValue.indexOf(" ")+1,nodeValue.indexOf(")"));
       nodeValue=nodeValue.substring(0,nodeValue.indexOf(" "));
-      
+      int val=Integer.parseInt(nodeValue);
+      if(val==0) nodeValue="COUNTRY";
+      if(val==0) nodeValue="PROGRAMME";
+      if(val>1)
+        nodeValue=mapWordConc.get(Integer.parseInt(nodeValue)-2);
       Node next=mapNode.get(nodeValue);
       if(next==null){
         next=new Node(nodeValue);
