@@ -31,13 +31,13 @@ void setup() {
     }
     if (line==null||(notInTree&&!line.contains("Tree ")))
     {
-        continue; //<>//
+        continue;
     }
     if (line.trim().isEmpty()){
       notInTree=true;
     }
     if (line.contains("Tree ")){
-      number=line.substring(line.indexOf("Tree ")+5,line.indexOf(":")); //<>//
+      number=line.substring(line.indexOf("Tree ")+5,line.indexOf(":"));
       notInTree=false;
       curEdge=new Edge(null,null,null);
       map.put(number.trim(),curEdge);
@@ -78,6 +78,7 @@ void setup() {
       curEdge.next=mapNode.get(nodeValue);
       if(curEdge.next==null){
         curEdge.next=new Node(nodeValue);
+        curEdge.next.parent=curEdge;
         curEdge.next.angle=curEdge.parent.angle+ random(-range, range);;
         curEdge.next.calculate();
         
@@ -92,8 +93,13 @@ void setup() {
     }
     
   }
+  
+  listPat=constructNodeFrom("3.0",map.get("50"));
+        println("number="+listPat.size());
+  
 }
- float scaleFactor=3;
+ArrayList<Node> listPat;
+ float scaleFactor=4;
 float translateX;
 float translateY;
 void draw() {
@@ -110,7 +116,7 @@ pushMatrix();
 
 translate(translateX,translateY);
   scale(scaleFactor);
-  drawNode(cuu.next, depart,0,360);
+  drawSuperNode(listPat);
 
 popMatrix();  
 fill(255);
@@ -121,7 +127,7 @@ noStroke();
 
 fill(c1);
 
-drawNode(cuu.next, depart,0,360);
+drawSuperNode(listPat);
 
 } 
 void mouseMoved(MouseEvent e) {
@@ -129,48 +135,59 @@ void mouseMoved(MouseEvent e) {
   translateY =  100-mouseY*scaleFactor;
 }
 
-float baselevel=20;
+float baselevel=40;
 
 float maxlevel=10;
 float maxLevel=20;
 float devAngle=0.005;
+void drawSuperNode(ArrayList<Node> list){
+  for(int i=0;i<list.size();i++){
+    drawNode(list.get(i),0,i*360/list.size(),(i+1)*360/list.size());
+  }
+}
 void drawNode(Node cuu,float levelBase,float beginangle,float endangle){
   if(cuu==null) return;
   strokeWeight(0.5);
-  if(levelBase>maxLevel) return;
-  float actLevel=baselevel+20*levelBase;
-  float actLevelP=baselevel+20*((levelBase+1));
+  //if(levelBase>maxLevel) return;
+  float actLevel=baselevel+15*levelBase;
+  float actLevelP=baselevel+15*((levelBase+1));
   
   float xbase=width*0.5;
   float ybase=height*0.5;
   cuu.angle=(endangle+beginangle)*0.5;
   cuu.calculate();
   stroke(153);
-  if(cuu.IF!=null){
-    cuu.IF.next.angle=(cuu.angle-devAngle+beginangle+devAngle)*0.5;
-    cuu.IF.next.calculate();
-    line(cuu.x*actLevel+xbase, cuu.y*actLevel+ybase, cuu.IF.next.x*actLevelP+xbase, cuu.IF.next.y*actLevelP+ybase);
-    drawNode(cuu.IF.next,levelBase+1,beginangle-devAngle,cuu.angle+devAngle);
+  if(cuu.parent!=null&&cuu.parent.parent!=null){
+    Edge parente=cuu.parent;
+    parente.parent.angle=(cuu.angle-devAngle+endangle+devAngle)*0.5; //<>//
+    parente.parent.calculate();
+    //line(cuu.x*actLevel+xbase, cuu.y*actLevel+ybase, parente.parent.x*actLevelP+xbase, parente.parent.y*actLevelP+ybase);
+    drawNode(parente.parent,levelBase+1,cuu.angle-devAngle,endangle+devAngle);
   }
-  if(cuu.ELSE!=null){
-    cuu.ELSE.next.angle=(cuu.angle-devAngle+endangle+devAngle)*0.5;
-    cuu.ELSE.next.calculate();
-    line(cuu.x*actLevel+xbase, cuu.y*actLevel+ybase, cuu.ELSE.next.x*actLevelP+xbase, cuu.ELSE.next.y*actLevelP+ybase);
-    drawNode(cuu.ELSE.next,levelBase+1,cuu.angle-devAngle,endangle+devAngle);
-  }
-  if(cuu.ELSE==null&&cuu.IF==null)
-  {
-    stroke(53);
-    textSize(2);
-    //text(cuu.value, cuu.x*level+xbase, cuu.y*level+ybase);
-  }
+  
   textSize(3);
   strokeWeight(2);
-  point(cuu.x*actLevel+xbase, cuu.y*actLevel+ybase);
+  //point(cuu.x*actLevel+xbase, cuu.y*actLevel+ybase);
   strokeWeight(0.5);
   text(cuu.name, cuu.x*actLevel+xbase, cuu.y*actLevel+ybase);
 }
 
+ArrayList<Node> constructNodeFrom(String patt,Edge root){
+  Edge start=root;
+      ArrayList<Node> list= new ArrayList();
+    if(start==null||start.next==null) return new ArrayList();
+    if(start.next.value!=null&&start.next.value.equals(patt)){
+      list.add(start.next);
+      
+      
+    }else{
+      list.addAll(constructNodeFrom(patt,root.next.IF));
+      list.addAll(constructNodeFrom(patt,root.next.ELSE));
+      
+    }
+  return list;
+  
+}
 class Node{
   String name;
   String content;
