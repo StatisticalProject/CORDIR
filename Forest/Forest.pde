@@ -45,11 +45,12 @@ void setup() {
       
       String reste=nodeValue.substring(nodeValue.indexOf(" ")+1,nodeValue.indexOf(")"));
       nodeValue=nodeValue.substring(0,nodeValue.indexOf(" "));
-      if(currentNode.IF==null){
-        currentNode.IF=new Node(nodeValue,reste);
-        currentNode.IF.parent=currentNode;
-        currentNode=currentNode.IF;
-      }
+      currentNode.IF=new Node(nodeValue,reste);
+      if(currentNode.IF.parent!=null)
+      currentNode.IF.parent.name=nodeValue;
+      currentNode.IF.parent=currentNode;
+      currentNode=currentNode.IF;
+      
     }
     if (line.contains("Else ")){
       String nodeValue=line.substring(line.indexOf("feature ")+8);
@@ -100,13 +101,23 @@ void drawNode(Node cuu,int x,int y){
 class Node{
   String name;
   String content;
-  Node IF=null;
-  Node ELSE;
-  Node parent;
+  Edge IF=null;
+  Edge ELSE;
+  Edge parent;
   String value=null;
-  Node(String name,String content){
-    this.name=name;
+  Node(String name){
+    
+  }
+ 
+}
+class Edge{
+  String content;
+  Node parent=null;
+  Node next=null;
+  Edge(String content,Node parent,Node next){
     this.content=content;
+    this.parent=parent;
+    this.next=next;
   }
  
 }
