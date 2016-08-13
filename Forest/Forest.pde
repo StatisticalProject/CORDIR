@@ -1,6 +1,8 @@
 BufferedReader reader;
 String line;
-HashMap<String,Node> map=new HashMap<String,Node>(); 
+HashMap<String,Edge> map=new HashMap<String,Edge>(); 
+HashMap<String,Node> mapNode=new HashMap<String,Node>(); 
+
 void setup() {
     background(255);
   size(1024, 768);
@@ -9,7 +11,7 @@ void setup() {
   reader = createReader("../model.txt");
   boolean notInTree=true;
   String number="0";
-  Node currentNode=new Node("root","");
+  Edge curEdge=new Edge(null,null,null);
   try {
     line = reader.readLine();
   } catch (IOException e) {
@@ -36,8 +38,8 @@ void setup() {
     if (line.contains("Tree ")){
       number=line.substring(line.indexOf("Tree ")+5,line.indexOf(":")); //<>//
       notInTree=false;
-      currentNode=new Node("root","");
-      map.put(number.trim(),currentNode);
+      curEdge=new Edge(null,null,null);
+      map.put(number.trim(),curEdge);
       println("number="+number);
     }
     if (line.contains("If ")){
@@ -45,11 +47,16 @@ void setup() {
       
       String reste=nodeValue.substring(nodeValue.indexOf(" ")+1,nodeValue.indexOf(")"));
       nodeValue=nodeValue.substring(0,nodeValue.indexOf(" "));
-      currentNode.IF=new Node(nodeValue,reste);
-      if(currentNode.IF.parent!=null)
-      currentNode.IF.parent.name=nodeValue;
-      currentNode.IF.parent=currentNode;
-      currentNode=currentNode.IF;
+      
+      Node next=mapNode.get(nodeValue);
+      if(next==null){
+        next=new Node(nodeValue);
+        //mapNode.put(nodeValue,next);
+      }
+      curEdge.next=next;
+      next.IF=new Edge(reste,next,null);
+      next.parent=curEdge;
+      curEdge=next.IF;
       
     }
     if (line.contains("Else ")){
@@ -57,45 +64,57 @@ void setup() {
       
       String reste=nodeValue.substring(nodeValue.indexOf(" ")+1,nodeValue.indexOf(")"));
       nodeValue=nodeValue.substring(0,nodeValue.indexOf(" "));
-      currentNode=currentNode.parent;
-      currentNode.ELSE=new Node(nodeValue,reste);
-        currentNode.ELSE.parent=currentNode;
-        currentNode=currentNode.ELSE;
+      Node par=curEdge.parent;
+      par.ELSE=new Edge(reste,par,null);
+      curEdge=par.ELSE;
       
     }
     if (line.contains("Predict: ")){
       String nodeValue=line.substring(line.indexOf("Predict: ")+9);
-      currentNode.value=nodeValue;
-      
+      curEdge.next=mapNode.get(nodeValue);
+      if(curEdge.next==null){
+        curEdge.next=new Node(nodeValue);
+        mapNode.put(nodeValue,curEdge.next);
+      }
+      curEdge.next.value=nodeValue;
+      while(curEdge.parent!=null&&curEdge.parent.ELSE!=null)
+      {
+        curEdge=curEdge.parent.parent;
+      }
+      //currentNode=currentNode.parent.parent;
     }
     
   }
 }
  
 void draw() {
-  Node cuu=map.get("0");
+  Edge cuu=map.get("1");
   color c1 = color(204, 153, 0);
 color c2 = #FFCC00;
 noStroke();
 fill(c1);
-  drawNode(cuu, 500, 100);
+  drawNode(cuu.next, 500, 100);
 } 
 
 void drawNode(Node cuu,int x,int y){
+  if(cuu==null) return;
   stroke(153);
   if(cuu.IF!=null){
-    line(x, y, x+20, y+20);
-    drawNode(cuu.IF,x+20,y+20);
+    line(cuu.x, cuu.y, cuu.IF.next.x, cuu.IF.next.y);
+    drawNode(cuu.IF.next,x+20,y+20);
   }
   if(cuu.ELSE!=null){
-    line(x, y, x-20, y+20);
-    drawNode(cuu.ELSE,x-20,y+20);
+    line(cuu.x, cuu.y, cuu.ELSE.next.x, cuu.ELSE.next.y);
+    drawNode(cuu.ELSE.next,x-20,y+20);
   }
   if(cuu.ELSE==null&&cuu.IF==null)
   {
-    text(cuu.value, x+20, y);
+    stroke(253);
+    textSize(20);
+    text(cuu.value, cuu.x, cuu.y);
   }
-  text(cuu.name, x, y);
+  textSize(1);
+  text(cuu.name, cuu.x, cuu.y);
 }
 
 class Node{
@@ -104,9 +123,13 @@ class Node{
   Edge IF=null;
   Edge ELSE;
   Edge parent;
+  int x;
+  int y;
   String value=null;
   Node(String name){
-    
+    this.name=name;
+    this.x=int(random(width));
+    this.y=int(random(height));
   }
  
 }
