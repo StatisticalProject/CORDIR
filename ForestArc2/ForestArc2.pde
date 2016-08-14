@@ -142,25 +142,26 @@ void setup() {
     }
     
   }
-  
-  listPat=constructNodeFrom("<500k",map.get("5"));
-        println("number="+listPat.size());
-  for(int i=0;i<listPat.size();i++){
-    countWord(listPat.get(i),0);
-  }
+  calculateTree();
   int count=0;
   for (int i=0;i<20;i++)
-    for(int j=0;j<5;j++)
-      listTreeButtons.add(new Button(j*30+10,i*25+250,20,20,Integer.toString(count++)));
-  listClassButtons.add(new Button(10,150,50,20,"<500k"));
-  listClassButtons.add(new Button(70,150,50,20,"500k-2800k"));
-  listClassButtons.add(new Button(130,150,50,20,"2800k-8M"));
-  listClassButtons.add(new Button(190,150,50,20,">8M"));
+    for(int j=0;j<5;j++){
+      Button but=new Button(j*30+10,i*25+250,20,20,Integer.toString(count++));
+      but.selected=but.text.equals(treeSel);
+      listTreeButtons.add(but);
+    }
+    Button b1=new Button(10,150,69,20,"<500k",10);
+    b1.selected=true;
+  listClassButtons.add(b1);
+  listClassButtons.add(new Button(81,150,69,20,"500k-2800k",10));
+  listClassButtons.add(new Button(10,172,69,20,"2800k-8M",10));
+  listClassButtons.add(new Button(81,172,69,20,">8M",10));
 }
 
 void calculateTree(){
   listPat=constructNodeFrom(classSel,map.get(treeSel));
         println("number="+listPat.size());
+  counterWord=      new HashMap();
   for(int i=0;i<listPat.size();i++){
     countWord(listPat.get(i),0);
   }
@@ -174,8 +175,13 @@ class Button{
   boolean over;
   boolean selected;
   String text;
+  float size;
   
   Button(int x,int y,int w,int h,String text){
+    this(x,y,w,h,text,0.7*h);
+  }
+  
+  Button(int x,int y,int w,int h,String text,float size){
     this.x=x;
     this.y=y;
     this.w=w;
@@ -183,15 +189,16 @@ class Button{
     this.over=false;
     this.selected=false;
     this.text=text;
+    this.size=size;
   }
   
   void draw(){
-    drawButton(x,y,w,h,over,selected,text);
+    drawButton(x,y,w,h,over,selected,text,size);
   }
   
   boolean select(int xin,int yin){
-    selected=isIn(xin,yin);
-    return selected;
+    return isIn(xin,yin);
+    
   }
   
   boolean isIn(int xin,int yin){
@@ -202,7 +209,7 @@ class Button{
     over=isIn(xin,yin);
   }
   
-  void drawButton(int x,int y,int w,int h,boolean over,boolean selected,String text){
+  void drawButton(int x,int y,int w,int h,boolean over,boolean selected,String text,float size){
     color rectColor = color(255);
     color rectHighlight = color(150);
     color rectHigh = color(100);
@@ -215,7 +222,7 @@ class Button{
       fill(rectColor);
     }
     stroke(0);
-    textSize(0.7*h);
+    textSize(size);
     rect(x, y, w, h);
     float si=textWidth(text);
     fill(0);
@@ -233,7 +240,7 @@ void draw() {
 color c2 = #FFCC00;
 int depart=0;
 fill(255);
-rect(0,0,200,200);
+rect(width-actX-100,actY-100,width-actX+100,actY+100);
 fill(c1);
 noStroke();  
 pushMatrix();
@@ -245,8 +252,9 @@ drawAll(counterWord);
 popMatrix();  
 fill(255);
 noStroke();
-rect(201,0,width,height);
-rect(0,201,width,height);
+rect(0,0,width-actX-101,height);
+rect(width-actX-101,actY+101,width-actX-101,height);
+
 noStroke();
 
 fill(c1);
@@ -261,6 +269,12 @@ for(Button but:listClassButtons){
   but.over(mouseX,mouseY);
   but.draw();
 }
+stroke(0);
+fill(255,255,255,0);
+float minscal=100/scaleFactor;
+scale(1);
+if(mouseX>180)
+rect(mouseX-minscal,mouseY-minscal,2*minscal,2*minscal);
 
 
 }
@@ -277,6 +291,7 @@ void mouseClicked() {
         if(butUn!=but)
           butUn.selected=false;
       }
+      but.selected=true;
       treeSel=but.text;
       calculateTree();
       break;
@@ -285,10 +300,11 @@ void mouseClicked() {
   for(Button but:listClassButtons){
     boolean sel=but.select(mouseX,mouseY);
     if(sel){
-      for(Button butUn:listTreeButtons){
+      for(Button butUn:listClassButtons){
         if(butUn!=but)
           butUn.selected=false;
       }
+      but.selected=true;
       classSel=but.text;
       calculateTree();
       break;
@@ -297,11 +313,11 @@ void mouseClicked() {
 }
 
   
-
-
+int actX=100;
+int actY=100;
 void mouseMoved(MouseEvent e) {
-  translateX = 100-mouseX*scaleFactor;
-  translateY =  100-mouseY*scaleFactor;
+  translateX = width-actX-mouseX*scaleFactor;
+  translateY =  actY-mouseY*scaleFactor;
 }
 
 float baselevel=40;
