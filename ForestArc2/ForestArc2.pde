@@ -6,7 +6,7 @@ ArrayList<String> mapWordConc=new ArrayList<String>();
 
 ArrayList<Button> listTreeButtons=new ArrayList(); 
 ArrayList<Button> listClassButtons=new ArrayList(); 
-
+int dep=145;
 void setup() {
     background(255);
   size(1024, 768);
@@ -144,27 +144,40 @@ void setup() {
   }
   calculateTree();
   int count=0;
+  
+  listTreeButtons.add(new Button(10,225,140,20,"Tous les arbres"));
   for (int i=0;i<20;i++)
     for(int j=0;j<5;j++){
       Button but=new Button(j*30+10,i*25+250,20,20,Integer.toString(count++));
       but.selected=but.text.equals(treeSel);
       listTreeButtons.add(but);
     }
-    Button b1=new Button(10,150,69,20,"<500k",10);
+    Button b1=new Button(10,dep+5,69,20,"<500k",10);
     b1.selected=true;
   listClassButtons.add(b1);
-  listClassButtons.add(new Button(81,150,69,20,"500k-2800k",10));
-  listClassButtons.add(new Button(10,172,69,20,"2800k-8M",10));
-  listClassButtons.add(new Button(81,172,69,20,">8M",10));
+  listClassButtons.add(new Button(81,dep+5,69,20,"500k-2800k",10));
+  listClassButtons.add(new Button(10,dep+27,69,20,"2800k-8M",10));
+  listClassButtons.add(new Button(81,dep+27,69,20,">8M",10));
 }
 
 void calculateTree(){
-  listPat=constructNodeFrom(classSel,map.get(treeSel));
-        println("number="+listPat.size());
-  counterWord=      new HashMap();
-  for(int i=0;i<listPat.size();i++){
-    countWord(listPat.get(i),0);
+  if(treeSel.equals("Tous les arbres")){
+    for(String keyin:map.keySet()){
+      calculateOneTree(keyin);
+    }
+  }else{
+    calculateOneTree(treeSel);
+    
   }
+}
+
+void  calculateOneTree(String treeSele){
+    listPat=constructNodeFrom(classSel,map.get(treeSele));
+          println("number="+listPat.size());
+    counterWord=      new HashMap();
+    for(int i=0;i<listPat.size();i++){
+      countWord(listPat.get(i),0);
+    }
 }
 
 class Button{
@@ -202,7 +215,7 @@ class Button{
   }
   
   boolean isIn(int xin,int yin){
-    return xin>x&&xin<x+w&&yin>y&&yin<y+w;
+    return xin>x&&xin<x+w&&yin>y&&yin<y+h;
   }
   
   void over(int xin,int yin){
@@ -276,7 +289,11 @@ scale(1);
 if(mouseX>180)
 rect(mouseX-minscal,mouseY-minscal,2*minscal,2*minscal);
 
+fill(0);
+textSize(14);
 
+text("Liste des classes",25, dep);
+    text("Liste des arbres",25, dep+70); 
 }
 
 String treeSel="0";
@@ -350,7 +367,10 @@ void drawLevel(HashMap<String,Integer> wordCount,int level){
     float si=map(wordCount.get(mess), 0, max,4, 15);
     fill(colorW.get(mess).colore);
     textSize(si);
-    drawWord(mess,130+level*15.0,PI*0.5+angl*count++);
+    int minV=130;
+    if(level==0)
+      minV=30;
+    drawWord(mess,minV+level*15.0,PI*0.25+angl*count++);
   }
 
 }
