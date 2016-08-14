@@ -3,6 +3,9 @@ String line;
 HashMap<String,Edge> map=new HashMap<String,Edge>(); 
 HashMap<String,Node> mapNode=new HashMap<String,Node>(); 
 ArrayList<String> mapWordConc=new ArrayList<String>();
+
+ArrayList<Button> listTreeButtons=new ArrayList(); 
+
 void setup() {
     background(255);
   size(1024, 768);
@@ -108,6 +111,18 @@ void setup() {
     }
     if (line.contains("Predict: ")){
       String nodeValue=line.substring(line.indexOf("Predict: ")+9);
+      if(nodeValue.equals("0.0")){
+        nodeValue="<500k";
+      }
+      if(nodeValue.equals("1.0")){
+        nodeValue="500k-2800k";
+      }
+      if(nodeValue.equals("2.0")){
+        nodeValue="2800k-8M";
+      }
+      if(nodeValue.equals("3.0")){
+        nodeValue=">8M";
+      }
       curEdge.next=mapNode.get(nodeValue);
       if(curEdge.next==null){
         curEdge.next=new Node(nodeValue);
@@ -127,10 +142,79 @@ void setup() {
     
   }
   
-  listPat=constructNodeFrom("1.0",map.get("50"));
+  listPat=constructNodeFrom("<500k",map.get("5"));
         println("number="+listPat.size());
   for(int i=0;i<listPat.size();i++){
     countWord(listPat.get(i),0);
+  }
+  int count=0;
+  for (int i=0;i<20;i++)
+    for(int j=0;j<5;j++)
+      listTreeButtons.add(new Button(j*30+10,i*25+250,20,20,Integer.toString(count++)));
+}
+
+void calculateTree(String tree){
+  listPat=constructNodeFrom("<500k",map.get(tree));
+        println("number="+listPat.size());
+  for(int i=0;i<listPat.size();i++){
+    countWord(listPat.get(i),0);
+  }
+}
+
+class Button{
+  int x;
+  int y;
+  int w;
+  int h;
+  boolean over;
+  boolean selected;
+  String text;
+  
+  Button(int x,int y,int w,int h,String text){
+    this.x=x;
+    this.y=y;
+    this.w=w;
+    this.h=h;
+    this.over=false;
+    this.selected=false;
+    this.text=text;
+  }
+  
+  void draw(){
+    drawButton(x,y,w,h,over,selected,text);
+  }
+  
+  boolean select(int xin,int yin){
+    selected=isIn(xin,yin);
+    return selected;
+  }
+  
+  boolean isIn(int xin,int yin){
+    return xin>x&&xin<x+w&&yin>y&&yin<y+w;
+  }
+  
+  void over(int xin,int yin){
+    over=isIn(xin,yin);
+  }
+  
+  void drawButton(int x,int y,int w,int h,boolean over,boolean selected,String text){
+    color rectColor = color(255);
+    color rectHighlight = color(150);
+    color rectHigh = color(100);
+    if (selected) {
+      fill(rectHigh);
+    } else
+    if (over) {
+      fill(rectHighlight);
+    } else {
+      fill(rectColor);
+    }
+    stroke(0);
+    textSize(0.7*h);
+    rect(x, y, w, h);
+    float si=textWidth(text);
+    fill(0);
+    text(text, x+w/2-si/2, y+h/4*3); 
   }
 }
 ArrayList<Node> listPat;
@@ -164,7 +248,29 @@ fill(c1);
 
 //drawSuperNode(listPat);
 drawAll(counterWord);
-} 
+for(Button but:listTreeButtons){
+  but.over(mouseX,mouseY);
+  but.draw();
+}
+
+}
+
+void mouseClicked() {
+  for(Button but:listTreeButtons){
+    boolean sel=but.select(mouseX,mouseY);
+    if(sel){
+      for(Button butUn:listTreeButtons){
+        if(butUn!=but)
+          butUn.selected=false;
+      }
+      calculateTree(but.text);
+      break;
+    }
+  }
+
+  
+}
+
 void mouseMoved(MouseEvent e) {
   translateX = 100-mouseX*scaleFactor;
   translateY =  100-mouseY*scaleFactor;
