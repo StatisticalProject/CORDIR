@@ -5,6 +5,7 @@ HashMap<String,Node> mapNode=new HashMap<String,Node>();
 ArrayList<String> mapWordConc=new ArrayList<String>();
 
 ArrayList<Button> listTreeButtons=new ArrayList(); 
+ArrayList<Button> listClassButtons=new ArrayList(); 
 
 void setup() {
     background(255);
@@ -151,10 +152,14 @@ void setup() {
   for (int i=0;i<20;i++)
     for(int j=0;j<5;j++)
       listTreeButtons.add(new Button(j*30+10,i*25+250,20,20,Integer.toString(count++)));
+  listClassButtons.add(new Button(10,150,50,20,"<500k"));
+  listClassButtons.add(new Button(70,150,50,20,"500k-2800k"));
+  listClassButtons.add(new Button(130,150,50,20,"2800k-8M"));
+  listClassButtons.add(new Button(190,150,50,20,">8M"));
 }
 
-void calculateTree(String tree){
-  listPat=constructNodeFrom("<500k",map.get(tree));
+void calculateTree(){
+  listPat=constructNodeFrom(classSel,map.get(treeSel));
         println("number="+listPat.size());
   for(int i=0;i<listPat.size();i++){
     countWord(listPat.get(i),0);
@@ -252,8 +257,17 @@ for(Button but:listTreeButtons){
   but.over(mouseX,mouseY);
   but.draw();
 }
+for(Button but:listClassButtons){
+  but.over(mouseX,mouseY);
+  but.draw();
+}
+
 
 }
+
+String treeSel="0";
+String classSel="<500k";
+
 
 void mouseClicked() {
   for(Button but:listTreeButtons){
@@ -263,13 +277,27 @@ void mouseClicked() {
         if(butUn!=but)
           butUn.selected=false;
       }
-      calculateTree(but.text);
+      treeSel=but.text;
+      calculateTree();
       break;
     }
   }
+  for(Button but:listClassButtons){
+    boolean sel=but.select(mouseX,mouseY);
+    if(sel){
+      for(Button butUn:listTreeButtons){
+        if(butUn!=but)
+          butUn.selected=false;
+      }
+      classSel=but.text;
+      calculateTree();
+      break;
+    }
+  }
+}
 
   
-}
+
 
 void mouseMoved(MouseEvent e) {
   translateX = 100-mouseX*scaleFactor;
