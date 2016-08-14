@@ -79,7 +79,7 @@ void setup() {
       nodeValue=nodeValue.substring(0,nodeValue.indexOf(" "));
       int val=Integer.parseInt(nodeValue);
       if(val==0) nodeValue="COUNTRY";
-      if(val==0) nodeValue="PROGRAMME";
+      if(val==1) nodeValue="PROGR";
       if(val>1)
         nodeValue=mapWordConc.get(Integer.parseInt(nodeValue)-2);
       Node next=mapNode.get(nodeValue);
@@ -127,9 +127,11 @@ void setup() {
     
   }
   
-  listPat=constructNodeFrom("3.0",map.get("50"));
+  listPat=constructNodeFrom("1.0",map.get("50"));
         println("number="+listPat.size());
-  
+  for(int i=0;i<listPat.size();i++){
+    countWord(listPat.get(i),0);
+  }
 }
 ArrayList<Node> listPat;
  float scaleFactor=4;
@@ -149,8 +151,8 @@ pushMatrix();
 
 translate(translateX,translateY);
   scale(scaleFactor);
-  drawSuperNode(listPat);
-
+  //drawSuperNode(listPat);
+drawAll(counterWord);
 popMatrix();  
 fill(255);
 noStroke();
@@ -160,8 +162,8 @@ noStroke();
 
 fill(c1);
 
-drawSuperNode(listPat);
-
+//drawSuperNode(listPat);
+drawAll(counterWord);
 } 
 void mouseMoved(MouseEvent e) {
   translateX = 100-mouseX*scaleFactor;
@@ -178,6 +180,62 @@ void drawSuperNode(ArrayList<Node> list){
     drawNode(list.get(i),0,i*360/list.size(),(i+1)*360/list.size());
   }
 }
+
+
+void drawAll(HashMap<Integer,HashMap<String,Integer>> wordCount){
+  for(Integer level:wordCount.keySet()){
+    drawLevel(wordCount.get(level),level);
+  }
+}
+
+void drawLevel(HashMap<String,Integer> wordCount,int level){
+  float angl=2*PI/wordCount.size();
+  int max=0;
+  for(String mess:wordCount.keySet()){
+    if(wordCount.get(mess)>max) max=wordCount.get(mess);
+  }
+  int count=0;
+  map(mouseX, 0, width, 0, 175);
+  for(String mess:wordCount.keySet()){
+    float si=map(wordCount.get(mess), 0, max,4, 15);
+    fill(colorW.get(mess).colore);
+    textSize(si);
+    drawWord(mess,130+level*15.0,PI*0.5+angl*count++);
+  }
+
+}
+
+void drawWord(String message,Float r,float baseAngle){
+  // We must keep track of our position along the curve
+  float arclength = 0;
+
+  // For every box
+  for (int i = 0; i < message.length(); i++)
+  {
+    // Instead of a constant width, we check the width of each character.
+    char currentChar = message.charAt(i);
+    float w = textWidth(currentChar);
+    if(currentChar=='i') w=w*0.5;
+
+    // Each box is centered so we move half the width
+    arclength += w/2;
+    // Angle in radians is the arclength divided by the radius
+    // Starting on the left side of the circle by adding PI
+    float theta = baseAngle+PI + arclength / r;    
+
+    pushMatrix();
+    // Polar to cartesian coordinate conversion
+    translate(width*0.5+r*cos(theta),height*0.5+ r*sin(theta));
+    // Rotate the box
+    rotate(theta+PI/2); // rotation is offset by 90 degrees
+    // Display the character
+    text(currentChar,0,0);
+    popMatrix();
+    // Move halfway again
+    arclength += w/2;
+  }
+}
+
 void drawNode(Node cuu,float levelBase,float beginangle,float endangle){
   if(cuu==null) return;
   strokeWeight(0.5);
@@ -204,6 +262,23 @@ void drawNode(Node cuu,float levelBase,float beginangle,float endangle){
   strokeWeight(0.5);
   text(cuu.name, cuu.x*actLevel+xbase, cuu.y*actLevel+ybase);
 }
+HashMap<Integer,HashMap<String,Integer>> counterWord=new HashMap();
+void countWord(Node cuu,int levelBase){
+  if(cuu==null) return;
+  if(counterWord.get(levelBase)==null){
+    counterWord.put(levelBase,new HashMap());
+  }
+  if(counterWord.get(levelBase).get(cuu.name)==null){
+    counterWord.get(levelBase).put(cuu.name,0);
+  }
+  counterWord.get(levelBase).put(cuu.name,counterWord.get(levelBase).get(cuu.name)+1);
+  if(cuu.parent!=null&&cuu.parent.parent!=null){
+    Edge parente=cuu.parent;
+    //line(cuu.x*actLevel+xbase, cuu.y*actLevel+ybase, parente.parent.x*actLevelP+xbase, parente.parent.y*actLevelP+ybase);
+    countWord(parente.parent,levelBase+1);
+  }
+}
+
 
 ArrayList<Node> constructNodeFrom(String patt,Edge root){
   Edge start=root;
@@ -221,6 +296,8 @@ ArrayList<Node> constructNodeFrom(String patt,Edge root){
   return list;
   
 }
+
+HashMap <String,Color> colorW=new HashMap();
 class Node{
   String name;
   String content;
@@ -231,6 +308,7 @@ class Node{
   float x;
   float y;
   String value=null;
+  color colori;
   Node(String name){
     this.name=name;
     angle=random(360);
@@ -239,6 +317,12 @@ class Node{
   
     this.x=px;
     this.y=py;
+    if(!colorW.containsKey(name)){
+      Color colore=new Color();
+      colore.colore=color(50+random(155),50+random(155),50+random(155));
+      colorW.put(name,colore);
+    }
+    this.colori=colorW.get(name).colore;
   }
   public void calculate(){
     x = cos(radians(angle));
@@ -246,6 +330,9 @@ class Node{
   
   }
  
+}
+class Color{
+  color colore;
 }
 class Edge{
   String content;
