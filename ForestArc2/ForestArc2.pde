@@ -6,8 +6,14 @@ ArrayList<String> mapWordConc=new ArrayList<String>();
 
 ArrayList<Button> listTreeButtons=new ArrayList(); 
 ArrayList<Button> listClassButtons=new ArrayList(); 
-int dep=145;
+int dep=25;
+HScrollbar hs1, hs2,hs3;
+
 void setup() {
+  
+  hs1 = new HScrollbar(width-195, 230, 190, 8, 32);
+  hs2 = new HScrollbar(width-195, 250, 190, 8, 32);
+  hs3 = new HScrollbar(width-195, 270, 190, 8, 32);
     background(255);
   size(1024, 768);
   HashMap<String,ArrayList<Float>> wordByYear=new HashMap<String,ArrayList<Float>>();
@@ -145,10 +151,10 @@ void setup() {
   calculateTree();
   int count=0;
   
-  listTreeButtons.add(new Button(10,225,140,20,"Tous les arbres"));
+  listTreeButtons.add(new Button(10,dep+80,140,20,"Tous les arbres"));
   for (int i=0;i<20;i++)
     for(int j=0;j<5;j++){
-      Button but=new Button(j*30+10,i*25+250,20,20,Integer.toString(count++));
+      Button but=new Button(j*30+10,i*25+dep+105,20,20,Integer.toString(count++));
       but.selected=but.text.equals(treeSel);
       listTreeButtons.add(but);
     }
@@ -253,6 +259,7 @@ void draw() {
 color c2 = #FFCC00;
 int depart=0;
 fill(255);
+stroke(0);
 rect(width-actX-100,actY-100,width-actX+100,actY+100);
 fill(c1);
 noStroke();  
@@ -293,7 +300,18 @@ fill(0);
 textSize(14);
 
 text("Liste des classes",25, dep);
-    text("Liste des arbres",25, dep+70); 
+    text("Liste des arbres",25, dep+70);
+  hs1.update();
+  hs2.update();
+  hs3.update();  
+  hs1.display();
+  hs2.display();
+  hs3.display();
+  scaleFactor=(hs1.getPos()-(width-200))/200*5;
+  maxChar=(int)(hs2.getPos()-(width-200))/200*30;
+  minV=(int)(hs3.getPos()-(width-200))/200*500;
+  
+  
 }
 
 String treeSel="0";
@@ -301,6 +319,8 @@ String classSel="<500k";
 
 
 void mouseClicked() {
+  
+  
   for(Button but:listTreeButtons){
     boolean sel=but.select(mouseX,mouseY);
     if(sel){
@@ -355,6 +375,9 @@ void drawAll(HashMap<Integer,HashMap<String,Integer>> wordCount){
   }
 }
 
+int maxChar=18;
+int minV=130;
+
 void drawLevel(HashMap<String,Integer> wordCount,int level){
   float angl=2*PI/wordCount.size();
   int max=0;
@@ -364,13 +387,13 @@ void drawLevel(HashMap<String,Integer> wordCount,int level){
   int count=0;
   map(mouseX, 0, width, 0, 175);
   for(String mess:wordCount.keySet()){
-    float si=map(wordCount.get(mess), 0, max,4, 15);
+    float si=map(wordCount.get(mess), 0, max,5, maxChar);
     fill(colorW.get(mess).colore);
     textSize(si);
-    int minV=130;
+    int selmin=minV;
     if(level==0)
-      minV=30;
-    drawWord(mess,minV+level*15.0,PI*0.25+angl*count++);
+      selmin=30;
+    drawWord(mess,selmin+level*15.0,PI*0.25+angl*count++);
   }
 
 }
@@ -514,4 +537,79 @@ class Edge{
     this.next=next;
   }
  
+}
+class HScrollbar {
+  int swidth, sheight;    // width and height of bar
+  float xpos, ypos;       // x and y position of bar
+  float spos, newspos;    // x position of slider
+  float sposMin, sposMax; // max and min values of slider
+  int loose;              // how loose/heavy
+  boolean over;           // is the mouse over the slider?
+  boolean locked;
+  float ratio;
+
+  HScrollbar (float xp, float yp, int sw, int sh, int l) {
+    swidth = sw;
+    sheight = sh;
+    int widthtoheight = sw - sh;
+    ratio = (float)sw / (float)widthtoheight;
+    xpos = xp;
+    ypos = yp-sheight/2;
+    spos = xpos + swidth/2 - sheight/2;
+    newspos = spos;
+    sposMin = xpos;
+    sposMax = xpos + swidth - sheight;
+    loose = l;
+  }
+
+  void update() {
+    if (overEvent()) {
+      over = true;
+    } else {
+      over = false;
+    }
+    if (mousePressed && over) {
+      locked = true;
+    }
+    if (!mousePressed) {
+      locked = false;
+    }
+    if (locked) {
+      newspos = constrain(mouseX-sheight/2, sposMin, sposMax);
+    }
+    if (abs(newspos - spos) > 1) {
+      spos = spos + (newspos-spos)/loose;
+    }
+  }
+
+  float constrain(float val, float minv, float maxv) {
+    return min(max(val, minv), maxv);
+  }
+
+  boolean overEvent() {
+    if (mouseX > xpos && mouseX < xpos+swidth &&
+       mouseY > ypos && mouseY < ypos+sheight) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  void display() {
+    noStroke();
+    fill(204);
+    rect(xpos, ypos, swidth, sheight);
+    if (over || locked) {
+      fill(0, 0, 0);
+    } else {
+      fill(102, 102, 102);
+    }
+    rect(spos, ypos, sheight, sheight);
+  }
+
+  float getPos() {
+    // Convert spos to be values between
+    // 0 and the total width of the scrollbar
+    return spos * ratio;
+  }
 }
