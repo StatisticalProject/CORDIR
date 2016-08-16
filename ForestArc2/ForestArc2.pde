@@ -11,9 +11,9 @@ HScrollbar hs1, hs2,hs3;
 
 void setup() {
   
-  hs1 = new HScrollbar(width-195, 230, 190, 8, 32);
-  hs2 = new HScrollbar(width-195, 250, 190, 8, 32);
-  hs3 = new HScrollbar(width-195, 270, 190, 8, 32);
+  hs1 = new HScrollbar(width-195, 230, 190, 8, 2);
+  hs2 = new HScrollbar(width-195, 250, 190, 8, 2);
+  hs3 = new HScrollbar(width-195, 270, 190, 8, 2);
     background(255);
   size(1024, 768);
   HashMap<String,ArrayList<Float>> wordByYear=new HashMap<String,ArrayList<Float>>();
@@ -307,9 +307,14 @@ text("Liste des classes",25, dep);
   hs1.display();
   hs2.display();
   hs3.display();
-  scaleFactor=(hs1.getPos()-(width-200))/200*5;
-  maxChar=(int)(hs2.getPos()-(width-200))/200*30;
-  minV=(int)(hs3.getPos()-(width-200))/200*500;
+  scaleFactor=(hs1.getPos()-(width-200))/231*5;
+  maxChar=(int)((hs2.getPos()-(width-200))/231*20+5);
+  minV=(int)((hs3.getPos()-(width-200))/231*180+20);
+  textSize(12);
+  text("Zoom",width-195, 225);
+  text("Taille des caratères",width-195, 245);
+  text("Rayon",width-195, 265);
+
   
   
 }
