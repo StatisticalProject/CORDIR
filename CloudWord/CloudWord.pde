@@ -133,8 +133,8 @@ void initScrollBar(){
   for (int i=1;i<nb+1;i++){
      datesSBar[i]=Integer.toString(2006+i-1);
   }
-  conceptSBar=new String[20];
-  for (int i=0;i<20;i++){
+  conceptSBar=new String[30];
+  for (int i=0;i<30;i++){
      conceptSBar[i]=Integer.toString(i+1);
   }
   selectionSBar=new String[]{"20","50","100","200","500","1000"};
