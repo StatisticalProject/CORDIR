@@ -20,23 +20,21 @@ db.project.find().snapshot().forEach(function(el) {
         } 
         el.field22 = el.field22.split(','); 
     } 
-    //On creer des classes de cout
-    var maxVal=2308257.14168001+4721538.09920443;
-    var count=100;
-    for (var i = 0; i < count; i++) {
-        j=i+1;
-        if(el.totalCost<j*maxVal/count){
-            el.totalCostFlag=parseInt(i*maxVal/count)+"-"+parseInt(j*maxVal/count);
-
-            el.totalCostFlagMean=0.5*(j+i)*maxVal/count;
-            el.totalCostFlagInt=i;
-            db.project.save(el);
-            return;
-        }
+    //On creer des classes de cout pour la modelisation
+    if(el.totalCost<500000){
+       el.catCost="<500k"
+       el.catCostNum=0 
+    }else
+    if(el.totalCost<2800000){
+       el.catCost="500k-2800k"
+       el.catCostNum=1 
+    }else
+    if(el.totalCost<8000000){
+       el.catCost="2800k-8M"
+       el.catCostNum=2 
+    }else{
+       el.catCost=">8M"
+       el.catCostNum=3 
     }
-    el.totalCostFlag=">"+parseInt(j*maxVal/count)
-    el.totalCostFlagInt=count;
-
-    el.totalCostFlagMean=(280086352+maxVal)*0.5;
     db.project.save(el); 
 }); 
