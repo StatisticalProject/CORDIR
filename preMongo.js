@@ -1,3 +1,7 @@
+db = connect("cordis")
+
+//Changement des chaines en liste
+print("Traitements des projets");
 db.project.find().snapshot().forEach(function(el) { 
     if (!Array.isArray(el.topics)) { 
         el.topics = el.topics.split(','); 
