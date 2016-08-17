@@ -36,7 +36,30 @@ g + geom_bar()+xlab("")+ylab("Effectif")  +theme(axis.text.x=element_text(angle=
 country<-as.data.frame(sort(table(projects$coordinatorCountry),decreasing=TRUE))
 country<-country[country$Freq>50,]
 
-  plot(country)
   g <- ggplot(data=country, aes(x=country$Var1,y=country$Freq))
   # Number of cars in each class:
   g + geom_bar(stat="identity")+xlab("")+ylab("Effectif")  +theme(axis.text.x=element_text(angle=20, hjust=1))
+
+#Analyse des status
+g <- ggplot(projects, aes(projects$status))
+# Number of cars in each class:
+g + geom_bar()+xlab("")+ylab("Effectif")  +theme(axis.text.x=element_text(angle=20, hjust=1))
+  
+  
+#Analyse des topics
+topics<-as.data.frame(sort(table(projects$topics),decreasing=TRUE))
+topics<-topics[topics$Freq>180,]
+g <- ggplot(data=topics, aes(x=topics$Var1,y=topics$Freq))
+g + geom_bar(stat="identity")+xlab("")+ylab("Effectif")  +theme(axis.text.x=element_text(angle=20, hjust=1))
+
+#Analyse des funding scheme
+fundingScheme<-as.data.frame(sort(table(projects$fundingScheme),decreasing=TRUE))
+fundingScheme<-foundingScheme[foundingScheme$Freq>180,]
+g <- ggplot(data=fundingScheme, aes(x=fundingScheme$Var1,y=fundingScheme$Freq))
+g + geom_bar(stat="identity")+xlab("")+ylab("Effectif")  +theme(axis.text.x=element_text(angle=20, hjust=1))
+
+#Analyse des sujets
+subject<-as.data.frame(sort(table(projects$subjects),decreasing=TRUE))
+subject<-subject[subject$Freq>180,]
+g <- ggplot(data=subject, aes(x=subject$Var1,y=subject$Freq))
+g + geom_bar(stat="identity")+xlab("")+ylab("Effectif")  +theme(axis.text.x=element_text(angle=20, hjust=1))
