@@ -63,3 +63,7 @@ subject<-as.data.frame(sort(table(projects$subjects),decreasing=TRUE))
 subject<-subject[subject$Freq>180,]
 g <- ggplot(data=subject, aes(x=subject$Var1,y=subject$Freq))
 g + geom_bar(stat="identity")+xlab("")+ylab("Effectif")  +theme(axis.text.x=element_text(angle=20, hjust=1))
+
+
+#anova resultat long a obtenir
+anovapro<-aov(totalCost~topics+subjects+fundingScheme+status+ coordinatorCountry+programme,projects)
