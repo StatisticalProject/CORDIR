@@ -1,23 +1,33 @@
- import java.util.*;
+import java.util.*;
+/* Liste des dates */
 String datesSBar[];
+/* Liste des concepts */
 String conceptSBar[];
+/* Liste des tailles */
 String selectionSBar[];
+/* Année sélectionné. Par défaut : Toutes */
 String yearSelected="Toutes";
+/* Concept selectionné */
 String conceptSelected="1";
-String poloo="";
-String poloo2="";
-HashMap<String,HashMap<String,Float[]>> wordByYear=new HashMap();
-HashMap<String,Color> colorByWord=new HashMap();
-ArrayList<TermForce> termsForce=new ArrayList();
+/* Nombre de termes sélectionnés */
 String nbSelect="100";
+/* Mapping des mots par année */
+HashMap<String,HashMap<String,Float[]>> wordByYear=new HashMap();
+/* Couleur de chaque mot */
+HashMap<String,Color> colorByWord=new HashMap();
+/* Liste de la force des Termes */
+ArrayList<TermForce> termsForce=new ArrayList();
+
+/**
+Taille max et min des fontes et des valeurs
+*/
 MaxSize max= new MaxSize();
+
 void setup() {
   background(255);
   size(1024, 768);
   initTable();
   initScrollBar();
-  //termsForce.add(new TermForce("test",10.0,(int)random(width),(int)random(height),max));
-  //termsForce.add(new TermForce("teste",0.2,(int)random(width),(int)random(height),max));
   termsForce=generateTermForce(yearSelected,conceptSelected,nbSelect);
   arrange(termsForce); 
 }
@@ -29,6 +39,9 @@ void draw() {
   drawScroll();
 }
 
+/**
+Generation des objects représentants force d'un terme
+*/
 ArrayList<TermForce> generateTermForce(String year,String concept,String nbSelect){
   max=new MaxSize();
   int nbSel=Integer.parseInt(nbSelect);
@@ -64,6 +77,9 @@ ArrayList<TermForce> generateTermForce(String year,String concept,String nbSelec
   }
   return tersRe;
 }
+/**
+Dessin de chaque terme 
+*/
 void drawSpirale(){
   for(TermForce ter:termsForce)
   {
@@ -71,6 +87,7 @@ void drawSpirale(){
   }
 }
 
+/** Dessin des scrollbar */
 void drawScroll(){
   int sliderW=(int)(height*0.8);
   String prevYear=yearSelected;
@@ -85,7 +102,7 @@ void drawScroll(){
     arrange(termsForce); 
   }
 }
-
+/* Chargement des données */
 void initTable(){
   Table tableConcept=loadTable("../projetTermConceptYear.csv");
   for (TableRow row : tableConcept.rows()) {
@@ -126,6 +143,7 @@ void initTable(){
     
   }
 }
+/* Initialisation des scrollbar */
 void initScrollBar(){
   int nb=2020-2006;
   datesSBar=new String[nb+1];
@@ -140,6 +158,7 @@ void initScrollBar(){
   selectionSBar=new String[]{"20","50","100","200","500","1000"};
 }
 
+/* Dessine une scroll bar */
 String drawScrollBar( String title, int x,int y,int h,String []list,String selection){
    textSize(12);
   int baseW=(int)Math.rint(h/list.length);
@@ -162,6 +181,7 @@ String drawScrollBar( String title, int x,int y,int h,String []list,String selec
   text(title, x-2, y-textAscent()+5);
   return select;
 }
+/* Dessin d'un élémeent de la scrollbar */
 void drawTextIndex(int baseX,int baseY,String text,boolean selected,boolean hov){
  
   if(hov){
@@ -305,7 +325,7 @@ class MaxSize{
   float fontMax=50;
   float fontMin=1;
 }
-
+/* Couleur */
 class Color{
   color colore;
 }
