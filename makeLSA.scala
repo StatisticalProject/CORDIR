@@ -21,43 +21,57 @@ import breeze.linalg.{DenseMatrix => BDenseMatrix, DenseVector => BDenseVector, 
 import org.apache.spark.mllib.regression._
 import org.apache.spark.rdd._
 
+//Access mongodb 
+MongoClient client = new MongoClient("localhost" , 27017);
+MongoDatabase db = client.getDatabase("cordis");
+
 //Chargement des données depuis mongodb
 @transient val mongoConfig = new Configuration()
 mongoConfig.set("mongo.input.uri",
-    "mongodb://localhost:27017/cordir.project")
+    "mongodb://localhost:27017/cordis.project")
 val documents = sc.newAPIHadoopRDD(
     mongoConfig,                // Configuration
     classOf[MongoInputFormat],  // InputFormat
     classOf[Object],            // Key type
     classOf[BSONObject])        // Value type
+
 //chargement des stop words
 val stopWords = sc.broadcast(ParseWikipedia.loadStopWords("deps/lsa/src/main/resources/stopwords.txt")).value
 
 //Lemmatization
 var lemmatized = documents.map(s=> (s._2.get("_id").toString,ParseWikipedia.plainTextToLemmas(s._2.get("objective").toString, stopWords, ParseWikipedia.createNLPPipeline())))
 
-val numTerms = 1000
-val k = 100 // nombre de valeurs singuliers à garder
-val nbConcept = 30
+//liste des mots
+var words=lemmatized.map(a=>Set(a._2:_*)).reduce((a,b)=>(a ++ b))
+
+val numTerms = 2000 // nombre de terme
+val k = 200 // nombre de valeurs singuliers à garder
+val nbConcept = 30 //Nombre de concept
 
 val filtered = lemmatized.filter(_._2.size > 1)
 val documentSize=documents.collect().length
 println("Documents Size : "+documentSize)
 println("Number of Terms : "+numTerms)
 val (termDocMatrix, termIds, docIds, idfs) = ParseWikipedia.termDocumentMatrix(filtered, stopWords, numTerms, sc)
+//nettoyage des collections
+db.getCollection("projetIdfs").drop();
+db.getCollection("projetTermDocMatrix").drop();
+db.getCollection("projetTermIds").drop();
+db.getCollection("projetDocIds").drop();
+
 
 //sauvegarde des tf-idf 
 val outputConfig = new Configuration()
-outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordir.projetIdfs")
+outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordis.projetIdfs")
 sc.parallelize(idfs.toSeq).saveAsNewAPIHadoopFile("file:///this-is-completely-unused",classOf[Object],classOf[BSONObject],classOf[MongoOutputFormat[Object, BSONObject]],outputConfig)
 
-outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordir.projetTermDocMatrix")
+outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordis.projetTermDocMatrix")
 termDocMatrix.zipWithIndex().map(a => (a._2,a._1.toArray)).saveAsNewAPIHadoopFile("file:///this-is-completely-unused",classOf[Object],classOf[BSONObject],classOf[MongoOutputFormat[Object, BSONObject]],outputConfig)
 
-outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordir.projetTermIds")
+outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordis.projetTermIds")
 sc.parallelize(termIds.toSeq).saveAsNewAPIHadoopFile("file:///this-is-completely-unused",classOf[Object],classOf[BSONObject],classOf[MongoOutputFormat[Object, BSONObject]],outputConfig)
 
-outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordir.projetDocIds")
+outputConfig.set("mongo.output.uri","mongodb://localhost:27017/cordis.projetDocIds")
 sc.parallelize(docIds.toSeq).saveAsNewAPIHadoopFile("file:///this-is-completely-unused",classOf[Object],classOf[BSONObject],classOf[MongoOutputFormat[Object, BSONObject]],outputConfig)
 
 
