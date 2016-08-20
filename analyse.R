@@ -71,3 +71,7 @@ cor(forcor$totalCost,forcor$ecMaxContribution)
 anovapro<-aov(totalCost~topics+subjects+fundingScheme+status+ coordinatorCountry+programme,projects)
 
 
+aggregate(totalCost~fundingScheme, data=projects,FUN=sum)
+aggregate(totalCost~fundingScheme, data=projects,FUN=mean)
+aggregate(totalCost~fundingScheme, data=projects,FUN=max)
+aggregate(ecMaxContribution~fundingScheme, data=projects,FUN=mean)
