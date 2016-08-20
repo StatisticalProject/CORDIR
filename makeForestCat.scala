@@ -59,10 +59,10 @@ def generateArray( programme:Double,funding:Double,country:Double, a:BasicDBList
 }*/
  def generateArray( country:Double, a:BasicDBList ) : Array[Double] = {
         var ree:Array[Double] =Array.fill[Double](a.size()+2)(0)
-        ree(0)=programme
-        ree(1)=country
+        
+        ree(0)=country
     
-        for(i <- 2 to a.size()-1){
+        for(i <- 1 to a.size()-1){
           ree(i)=a.get(i).asInstanceOf[Double]
         }
         return ree
