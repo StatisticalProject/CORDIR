@@ -1,4 +1,4 @@
-db = connect("cordir");
+db = connect("cordis");
 db.activityType.drop();
 db.brief.drop();
 db.country.drop();
