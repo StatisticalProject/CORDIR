@@ -52,8 +52,8 @@ var select=documents.filter(a=>a._2.get("years").asInstanceOf[List[Double]].cont
     if(select.count()>0){
         
 var lemmatized = select.map(s=> (s._2.get("_id").toString,ParseWikipedia.plainTextToLemmas(s._2.get("objective").toString, stopWords, ParseWikipedia.createNLPPipeline())))
-val numTerms = 2000
-val k = 200 // nombre de valeurs singuliers à garder
+val numTerms = 1000
+val k = 100 // nombre de valeurs singuliers à garder
 val nbConcept = 30
 
 val filtered = lemmatized.filter(_._2.size > 1)

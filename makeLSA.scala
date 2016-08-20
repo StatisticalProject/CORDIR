@@ -52,8 +52,8 @@ var lemmatized = documents.map(s => (s._2.get("_id").toString, ParseWikipedia.pl
 //liste des mots
 var words = lemmatized.map(a => Set(a._2: _ * )).reduce((a, b) => (a++b))
 
-val numTerms = 2000 // nombre de terme
-val k = 200 // nombre de valeurs singuliers à garder
+val numTerms = 1000 // nombre de terme
+val k = 100 // nombre de valeurs singuliers à garder
 val nbConcept = 30 //Nombre de concept
  //on filtre les mots de moins de deux caractères
 val filtered = lemmatized.filter(_._2.size > 1)
