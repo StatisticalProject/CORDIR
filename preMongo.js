@@ -12,32 +12,26 @@ db.project.find().snapshot().forEach(function(el) {
     if (!Array.isArray(el.participantCountries)) { 
         el.participantCountries = el.participantCountries.split(','); 
     } 
-    if (!Array.isArray(el.subjects)) { 
+    if (!Array.isArray(el.subjects)) {
+        if (typeof(el.subjects) == "number") { 
+            el.subjects = "INF" 
+        } 
         el.subjects = el.subjects.split(','); 
     } 
-    if (!Array.isArray(el.field21)) { 
-        el.field21 = el.field21.split(','); 
-    } 
-    if (!Array.isArray(el.field22)) { 
-        if (typeof(el.field22) == "number") { 
-            el.field22 = "INF" 
-        } 
-        el.field22 = el.field22.split(','); 
-    } 
     //On creer des classes de cout pour la modelisation
-    if(el.totalCost<500000){
-       el.catCost="<500k"
+    if(el.totalCost<193000){
+       el.catCost="<193k"
        el.catCostNum=0 
     }else
-    if(el.totalCost<2800000){
-       el.catCost="500k-2800k"
+    if(el.totalCost<1243000){
+       el.catCost="193k-1243k"
        el.catCostNum=1 
     }else
-    if(el.totalCost<8000000){
-       el.catCost="2800k-8M"
+    if(el.totalCost<2942000){
+       el.catCost="1243k-2942k"
        el.catCostNum=2 
     }else{
-       el.catCost=">8M"
+       el.catCost=">2942k"
        el.catCostNum=3 
     }
     db.project.save(el); 

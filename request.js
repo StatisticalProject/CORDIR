@@ -1,5 +1,5 @@
-//Connection 
-db = connect("cordir")
+//Connection 
+db = connect("cordis")
 
 //Changement des chaines en liste
 print("Traitements des projets");
