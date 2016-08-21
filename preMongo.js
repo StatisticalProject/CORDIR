@@ -24,22 +24,19 @@ db.project.find().snapshot().forEach(function(el) {
     if (typeof(el.ecMaxContribution) != "number") { 
             el.ecMaxContribution = parseFloat(el.ecMaxContribution)
     }
-    
+    el.catCostNum=0;
     //On creer des classes de cout pour la modelisation
-    if(el.totalCost<193000){
-       el.catCost="<193k"
+    if(el.totalCost<400000){
+       el.catCost="<400k"
        el.catCostNum=0 
     }else
-    if(el.totalCost<1243000){
-       el.catCost="193k-1243k"
+    if(el.totalCost<3000000){
+       el.catCost="400k-3000k"
        el.catCostNum=1 
     }else
-    if(el.totalCost<2942000){
-       el.catCost="1243k-2942k"
+    if(el.totalCost>=3000000){
+       el.catCost=">3000k"
        el.catCostNum=2 
-    }else{
-       el.catCost=">2942k"
-       el.catCostNum=3 
     }
     db.project.save(el); 
 }); 

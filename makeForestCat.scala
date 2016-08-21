@@ -32,6 +32,7 @@ def removeAll(path: String) = {
       if (!f.delete()) 
         throw new RuntimeException("Failed to delete " + f.getAbsolutePath)}
   }
+if(new File("randomForestClassificationModel").exists())
 removeAll("randomForestClassificationModel")
 new File("randomForestClassificationModel").delete()
 
@@ -68,12 +69,12 @@ def generateArray( programme:Double,funding:Double,country:Double, a:BasicDBList
         }
         return ree
 }*/
- def generateArray( country:Double, a:BasicDBList ) : Array[Double] = {
+ def generateArray( country:Double, funding:Double,a:BasicDBList ) : Array[Double] = {
         var ree:Array[Double] =Array.fill[Double](a.size()+2)(0)
         
         ree(0)=country
-    
-        for(i <- 1 to a.size()-1){
+        ree(1)=funding
+        for(i <- 2 to a.size()-1){
           ree(i)=a.get(i).asInstanceOf[Double]
         }
         return ree
@@ -110,21 +111,22 @@ for (key <- keys) {
 
 val data=joinedDocuments.map(a => LabeledPoint(a._2.get("catCostNum").asInstanceOf[Double],new DenseVector(generateArray(
     countryMap(a._2.get("coordinatorCountry").toString).asInstanceOf[Double],
+    foundMap(a._2.get("fundingScheme").toString).asInstanceOf[Double],
     a._2.get("value").asInstanceOf[BasicDBList]))))
-val splits = data.randomSplit(Array(0.7, 0.3),13)
+val splits = data.randomSplit(Array(0.7, 0.3),7)
 val (trainingData, testData) = (splits(0), splits(1))
 
-val numClasses = 4
+val numClasses = 3
 val categoricalFeaturesInfo = Map[Int, Int]((0,84))
 val numTrees = 100  // Use more in practice.
 val featureSubsetStrategy = "auto" // Let the algorithm choose.
 val impurity = "gini"
-val maxDepth = 15
+val maxDepth = 13
 val maxBins = 84
 
 
 val model = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeaturesInfo,
-  numTrees, featureSubsetStrategy, impurity, maxDepth, maxBins)
+  numTrees, featureSubsetStrategy, impurity, maxDepth, maxBins,7)
 
 // Evaluate model on test instances and compute test error
 val labelsAndPredictions = testData.map { point =>
