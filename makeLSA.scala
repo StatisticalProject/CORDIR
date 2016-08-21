@@ -94,15 +94,15 @@ var all = sc.emptyRDD[(String, Double)]
 import collection.mutable.HashMap
 val docConcept = new HashMap[String, ListBuffer[Double]]()
 var count = 0
-for (a < -topConceptDocs) {
+for (a <-topConceptDocs) {
  count += 1
- for ((b, c) < -a) {
+ for ((b, c) <-a) {
   if (!docConcept.contains(b)) {
    docConcept.put(b, new ListBuffer[Double]())
   }
   docConcept(b) += c
  }
- for ((k, v) < -docConcept) {
+ for ((k, v) <-docConcept) {
   while (v.size < count) {
    v += 0.0
   }
@@ -130,15 +130,15 @@ toWrite.saveAsNewAPIHadoopFile(
 
 val termConcept = new HashMap[String, ListBuffer[Double]]()
 count = 0
-for (a < -topConceptTerms) {
+for (a <-topConceptTerms) {
  count += 1
- for ((b, c) < -a) {
+ for ((b, c) <-a) {
   if (!termConcept.contains(b)) {
    termConcept.put(b, new ListBuffer[Double]())
   }
   termConcept(b) += c
  }
- for ((k, v) < -termConcept) {
+ for ((k, v) <-termConcept) {
   while (v.size < count) {
    v += 0.0
   }
@@ -153,4 +153,4 @@ parr.map(a => (a._1, a._2.toArray)).coalesce(1, true).saveAsNewAPIHadoopFile("fi
 
 
 
-//exit
+exit

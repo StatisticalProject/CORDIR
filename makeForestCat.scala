@@ -24,6 +24,17 @@ import org.apache.spark.mllib.tree.RandomForest
 import org.apache.spark.mllib.tree.model.RandomForestModel
 import org.apache.spark.mllib.util.MLUtils
 
+
+def removeAll(path: String) = {
+    def getRecursively(f: File): Seq[File] = 
+      f.listFiles.filter(_.isDirectory).flatMap(getRecursively) ++ f.listFiles
+    getRecursively(new File(path)).foreach{f => 
+      if (!f.delete()) 
+        throw new RuntimeException("Failed to delete " + f.getAbsolutePath)}
+  }
+removeAll("randomForestClassificationModel")
+new File("randomForestClassificationModel").delete()
+
 @transient val mongoConfig = new Configuration()
 mongoConfig.set("mongo.input.uri",
     "mongodb://localhost:27017/cordis.project")
@@ -98,10 +109,9 @@ for (key <- keys) {
 }
 
 val data=joinedDocuments.map(a => LabeledPoint(a._2.get("catCostNum").asInstanceOf[Double],new DenseVector(generateArray(
-    progMap(
     countryMap(a._2.get("coordinatorCountry").toString).asInstanceOf[Double],
     a._2.get("value").asInstanceOf[BasicDBList]))))
-val splits = data.randomSplit(Array(0.7, 0.3),7)
+val splits = data.randomSplit(Array(0.7, 0.3),13)
 val (trainingData, testData) = (splits(0), splits(1))
 
 val numClasses = 4
@@ -113,23 +123,6 @@ val maxDepth = 15
 val maxBins = 84
 
 
-/*
-val data=joinedDocuments.map(a => LabeledPoint(a._2.get("catCostNum").asInstanceOf[Double],new DenseVector(generateArray(
-    progMap(a._2.get("programme").toString).asInstanceOf[Double],
-    foundMap(a._2.get("fundingScheme").toString).asInstanceOf[Double],
-    countryMap(a._2.get("coordinatorCountry").toString).asInstanceOf[Double],
-    a._2.get("value").asInstanceOf[BasicDBList]))))
-val splits = data.randomSplit(Array(0.7, 0.3))
-val (trainingData, testData) = (splits(0), splits(1))
-
-val numClasses = 6
-val categoricalFeaturesInfo = Map[Int, Int]((0,23),(1,45),(2,84))
-val numTrees = 50 // Use more in practice.
-val featureSubsetStrategy = "auto" // Let the algorithm choose.
-val impurity = "gini"
-val maxDepth = 7
-val maxBins = 84
-*/
 val model = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeaturesInfo,
   numTrees, featureSubsetStrategy, impurity, maxDepth, maxBins)
 
@@ -147,5 +140,12 @@ var results=labelsAndPredictions.map(a=>((a._1,a._2),((a._1==a._2):Int,(a._1!=a.
 for (res <- results) {
     println(res)
 }
+
+//Save for visualization
+new File("model.txt").delete()
+var f = new FileWriter("model.txt") 
+f.write(model.toDebugString)
+f.close() 
+
 model.save(sc, "randomForestClassificationModel")
 exit

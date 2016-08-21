@@ -17,7 +17,14 @@ db.project.find().snapshot().forEach(function(el) {
             el.subjects = "INF" 
         } 
         el.subjects = el.subjects.split(','); 
-    } 
+    }
+    if (typeof(el.totalCost) != "number") { 
+            el.totalCost = parseFloat(el.totalCost) 
+    }
+    if (typeof(el.ecMaxContribution) != "number") { 
+            el.ecMaxContribution = parseFloat(el.ecMaxContribution)
+    }
+    
     //On creer des classes de cout pour la modelisation
     if(el.totalCost<193000){
        el.catCost="<193k"
