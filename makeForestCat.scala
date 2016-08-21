@@ -24,7 +24,7 @@ import org.apache.spark.mllib.tree.RandomForest
 import org.apache.spark.mllib.tree.model.RandomForestModel
 import org.apache.spark.mllib.util.MLUtils
 
-
+/* Suppression des répertoire de résultat */
 def removeAll(path: String) = {
     def getRecursively(f: File): Seq[File] = 
       f.listFiles.filter(_.isDirectory).flatMap(getRecursively) ++ f.listFiles
@@ -36,6 +36,7 @@ if(new File("randomForestClassificationModel").exists())
 removeAll("randomForestClassificationModel")
 new File("randomForestClassificationModel").delete()
 
+/* Chargement des données */
 @transient val mongoConfig = new Configuration()
 mongoConfig.set("mongo.input.uri",
     "mongodb://localhost:27017/cordis.project")
@@ -53,22 +54,12 @@ val documentsDocConcept = sc.newAPIHadoopRDD(
     classOf[Object],            // Key type
     classOf[BSONObject])        // Value type
 
+/* joindre deux BSONObject */
 def mergeBSON( a:BSONObject, b:BSONObject ) : BSONObject = {
       a.putAll(b)
       return a
 }
-/*
-def generateArray( programme:Double,funding:Double,country:Double, a:BasicDBList ) : Array[Double] = {
-        var ree:Array[Double] =Array.fill[Double](a.size()+3)(0)
-        ree(0)=programme
-        ree(1)=funding
-        ree(2)=country
-    
-        for(i <- 3 to a.size()-1){
-          ree(i)=a.get(i).asInstanceOf[Double]
-        }
-        return ree
-}*/
+
  def generateArray( country:Double, funding:Double,a:BasicDBList ) : Array[Double] = {
         var ree:Array[Double] =Array.fill[Double](a.size()+2)(0)
         
@@ -80,27 +71,21 @@ def generateArray( programme:Double,funding:Double,country:Double, a:BasicDBList
         return ree
 }   
 
-
+/* On joint les deux collection */
 var joinedDocuments=documents.map(a=>(a._1.toString,a._2)).join(documentsDocConcept.map(a=>(a._1.toString,a._2))).map(a => (a._1,mergeBSON(a._2._1,a._2._2)))
 //joinedDocuments.map(a => (a._1,mergeBSON(a._2._1,a._2._2))).take(1).foreach(println)
 
 
-var keys=joinedDocuments.map(a=>(a._2.get("programme"),1)).reduceByKey((a,b)=>a+b).keys.collect()
+/* Transformation des schémas en indicatrice */
+var keys=joinedDocuments.map(a=>(a._2.get("fundingScheme"),1)).reduceByKey((a,b)=>a+b).keys.collect()
 var count=0
-var progMap:Map[String,Int] = Map()
-for (key <- keys) {
-    progMap += key.toString -> count
-    count=count+1
-}
-
-keys=joinedDocuments.map(a=>(a._2.get("fundingScheme"),1)).reduceByKey((a,b)=>a+b).keys.collect()
-count=0
 var foundMap:Map[String,Int] = Map()
 for (key <- keys) {
     foundMap += key.toString -> count
     count=count+1
 }
 
+/* Transformation des pays en indicatrice */
 keys=joinedDocuments.map(a=>(a._2.get("coordinatorCountry"),1)).reduceByKey((a,b)=>a+b).keys.collect()
 count=0
 var countryMap:Map[String,Int] = Map()
@@ -109,15 +94,20 @@ for (key <- keys) {
     count=count+1
 }
 
+/* Creation des données constitué la catégorie de coûts , pays et schéma */
 val data=joinedDocuments.map(a => LabeledPoint(a._2.get("catCostNum").asInstanceOf[Double],new DenseVector(generateArray(
     countryMap(a._2.get("coordinatorCountry").toString).asInstanceOf[Double],
     foundMap(a._2.get("fundingScheme").toString).asInstanceOf[Double],
     a._2.get("value").asInstanceOf[BasicDBList]))))
+
+/* Création du jeu d'apprentissage et de validation */
 val splits = data.randomSplit(Array(0.7, 0.3),7)
 val (trainingData, testData) = (splits(0), splits(1))
 
+/* Paramétrage de l'algorithme */
+/* Nombre de classe */
 val numClasses = 3
-val categoricalFeaturesInfo = Map[Int, Int]((0,84))
+val categoricalFeaturesInfo = Map[Int, Int]((0,84),(1,45))
 val numTrees = 100  // Use more in practice.
 val featureSubsetStrategy = "auto" // Let the algorithm choose.
 val impurity = "gini"
