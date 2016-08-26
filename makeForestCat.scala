@@ -107,37 +107,45 @@ val (trainingData, testData) = (splits(0), splits(1))
 /* Paramétrage de l'algorithme */
 /* Nombre de classe */
 val numClasses = 3
+/* Description des caractéristiques des variables qualitatives (emplacement/nombre de classe) */
 val categoricalFeaturesInfo = Map[Int, Int]((0,84),(1,45))
-val numTrees = 100  // Use more in practice.
+/* Nombre d'arbe */
+val numTrees = 100  
 val featureSubsetStrategy = "auto" // Let the algorithm choose.
+/* Calcul des impureté */
 val impurity = "gini"
+/* Epaisseur de l'arbe */
 val maxDepth = 13
+/* Nombre de valeur dans une variable qualitative */
 val maxBins = 84
 
-
+/* Apprentissage du modèle */
 val model = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeaturesInfo,
   numTrees, featureSubsetStrategy, impurity, maxDepth, maxBins,7)
 
-// Evaluate model on test instances and compute test error
+/* Evaluation du modèle */
 val labelsAndPredictions = testData.map { point =>
   val prediction = model.predict(point.features)
   (point.label, prediction)
 }
+/* Calcul de l'erreur */
 val testErr = labelsAndPredictions.filter(r => r._1 != r._2).count.toDouble / testData.count()
 println("Test Error = " + testErr)
-//println("Learned regression forest model:\n" + model.toDebugString)
+
 labelsAndPredictions.groupBy(a=>a._1)
+/* Calcul des résultats bon/mauvais par classe */ 
 implicit def bool2int(b:Boolean) = if (b) 1 else 0
 var results=labelsAndPredictions.map(a=>((a._1,a._2),((a._1==a._2):Int,(a._1!=a._2):Int))).reduceByKey((a,b)=>(a._1+b._1,a._2+b._2))
 for (res <- results) {
     println(res)
 }
 
-//Save for visualization
+/* Sauvegarde du modèle pour la visualisation */
 new File("model.txt").delete()
 var f = new FileWriter("model.txt") 
 f.write(model.toDebugString)
 f.close() 
 
+/* Sauvegarde du modèle pour la prédiction */
 model.save(sc, "randomForestClassificationModel")
 exit
