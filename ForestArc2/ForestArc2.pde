@@ -2,6 +2,8 @@ BufferedReader reader; //<>//
 String line;
 HashMap < String, Edge > map = new HashMap < String, Edge > ();
 HashMap < String, Node > mapNode = new HashMap < String, Node > ();
+HashMap < Integer, HashMap < String, Integer >> counterWord = new HashMap();
+
 ArrayList < String > mapWordConc = new ArrayList < String > ();
 
 ArrayList < Button > listTreeButtons = new ArrayList();
@@ -37,6 +39,80 @@ void setup() {
 
 }
 
+
+void draw() {
+ background(255);
+ color c1 = color(204, 153, 0);
+ fill(255);
+ stroke(0);
+ rect(width - actX - 100, actY - 100, width - actX + 100, actY + 100);
+ fill(c1);
+ noStroke();
+
+ /* Dessin du zoom (meme que grand avec scale) */
+ pushMatrix();
+
+ translate(translateX, translateY);
+ scale(scaleFactor);
+ drawAll(counterWord);
+ popMatrix();
+ fill(255);
+ noStroke();
+ rect(0, 0, width - actX - 101, height);
+ rect(width - actX - 101, actY + 101, width - actX - 101, height);
+
+ noStroke();
+
+ fill(c1);
+ // Dessin a taille originale
+ drawAll(counterWord);
+ //Dessin des composants
+ drawTotalComponents();
+
+
+}
+
+/* gestion du click du button */
+void mouseClicked() {
+
+ /* recalcul en cas de selection d'un arbre */
+ for (Button but: listTreeButtons) {
+  boolean sel = but.select(mouseX, mouseY);
+  if (sel) {
+   for (Button butUn: listTreeButtons) {
+    if (butUn != but)
+     butUn.selected = false;
+   }
+   but.selected = true;
+   treeSel = but.text;
+   calculateTree();
+   break;
+  }
+ }
+ /* recalcul en cas de selection d'une classe */
+ for (Button but: listClassButtons) {
+  boolean sel = but.select(mouseX, mouseY);
+  if (sel) {
+   for (Button butUn: listClassButtons) {
+    if (butUn != but)
+     butUn.selected = false;
+   }
+   but.selected = true;
+   classSel = but.text;
+   calculateTree();
+   break;
+  }
+ }
+}
+
+
+/* changement du centre du zoom en fonction de l'emplaement de la souris */
+void mouseMoved(MouseEvent e) {
+ translateX = width - actX - mouseX * scaleFactor;
+ translateY = actY - mouseY * scaleFactor;
+}
+
+/* création de liste des boutons pour sélectionner un arbre */
 void createForest(){
  int count = 0;
  Button arbru=new Button(10, dep + 80, 140, 20, "Tous les arbres");
@@ -54,13 +130,16 @@ void createForest(){
  listClassButtons.add(new Button(81, dep + 5, 69, 20, "400k-3M", 10));
  listClassButtons.add(new Button(10, dep + 27, 69, 20, ">3M", 10));
 }
+
+/* création des scroll bar de réglage du zoom de la taille des caractèes et du rayon*/
 void createScrollBar(){
  hs1 = new HScrollbar(width - 195, 230, 190, 8, 2);
  hs2 = new HScrollbar(width - 195, 250, 190, 8, 2);
  hs3 = new HScrollbar(width - 195, 270, 190, 8, 2);
 }
+/* Chargement des concepts/termes et des arbres du modèle */ 
 void loadData(){
-HashMap < String, ArrayList < Float >> wordByYear = new HashMap < String, ArrayList < Float >> ();
+ HashMap < String, ArrayList < Float >> wordByYear = new HashMap < String, ArrayList < Float >> ();
 
  Table tableConcept = loadTable("../projetTermConcept.csv");
  for (TableRow row: tableConcept.rows()) {
@@ -186,6 +265,8 @@ HashMap < String, ArrayList < Float >> wordByYear = new HashMap < String, ArrayL
 
  }
 }
+
+/* calcul de la valeur des termes par leur nombre*/ 
 void calculateTree() {
  if (treeSel.equals("Tous les arbres")) {
   for (String keyin: map.keySet()) {
@@ -197,6 +278,7 @@ void calculateTree() {
  }
 }
 
+/* calcul de la taille d'un mot par arbre */ 
 void calculateOneTree(String treeSele) {
  listPat = constructNodeFrom(classSel, map.get(treeSele));
  counterWord = new HashMap();
@@ -205,101 +287,14 @@ void calculateOneTree(String treeSele) {
  }
 }
 
-class Button {
- int x;
- int y;
- int w;
- int h;
- boolean over;
- boolean selected;
- String text;
- float size;
-
- Button(int x, int y, int w, int h, String text) {
-  this(x, y, w, h, text, 0.7 * h);
- }
-
- Button(int x, int y, int w, int h, String text, float size) {
-  this.x = x;
-  this.y = y;
-  this.w = w;
-  this.h = h;
-  this.over = false;
-  this.selected = false;
-  this.text = text;
-  this.size = size;
- }
-
- void draw() {
-  drawButton(x, y, w, h, over, selected, text, size);
- }
-
- boolean select(int xin, int yin) {
-  return isIn(xin, yin);
-
- }
-
- boolean isIn(int xin, int yin) {
-  return xin > x && xin < x + w && yin > y && yin < y + h;
- }
-
- void over(int xin, int yin) {
-  over = isIn(xin, yin);
- }
-
- void drawButton(int x, int y, int w, int h, boolean over, boolean selected, String text, float size) {
-  color rectColor = color(255);
-  color rectHighlight = color(150);
-  color rectHigh = color(100);
-  if (selected) {
-   fill(rectHigh);
-  } else
-  if (over) {
-   fill(rectHighlight);
-  } else {
-   fill(rectColor);
-  }
-  stroke(0);
-  textSize(size);
-  rect(x, y, w, h);
-  float si = textWidth(text);
-  fill(0);
-  text(text, x + w / 2 - si / 2, y + h / 4 * 3);
- }
-}
-void draw() {
- background(255);
- Edge cuu = map.get("50");
- color c1 = color(204, 153, 0);
- color c2 = #FFCC00;
- int depart = 0;
- fill(255);
- stroke(0);
- rect(width - actX - 100, actY - 100, width - actX + 100, actY + 100);
- fill(c1);
- noStroke();
- pushMatrix();
-
- translate(translateX, translateY);
- scale(scaleFactor);
- //drawSuperNode(listPat);
- drawAll(counterWord);
- popMatrix();
- fill(255);
- noStroke();
- rect(0, 0, width - actX - 101, height);
- rect(width - actX - 101, actY + 101, width - actX - 101, height);
-
- noStroke();
-
- fill(c1);
-
- //drawSuperNode(listPat);
- drawAll(counterWord);
- for (Button but: listTreeButtons) {
+/* Dessin de tous les composants */
+void drawTotalComponents(){
+  /*Dessin des boutons des arbres */
+  for (Button but: listTreeButtons) {
   but.over(mouseX, mouseY);
   but.draw();
  }
+ /* Dessin des boutons des classes */
  for (Button but: listClassButtons) {
   but.over(mouseX, mouseY);
   but.draw();
@@ -316,12 +311,14 @@ void draw() {
 
  text("Liste des classes", 25, dep);
  text("Liste des arbres", 25, dep + 70);
+ /* calcul et affichage des scrollbar */
  hs1.update();
  hs2.update();
  hs3.update();
  hs1.display();
  hs2.display();
  hs3.display();
+ /* calcul du scale factor pour le zoom */
  scaleFactor = (hs1.getPos() - (width - 200)) / 231 * 5;
  maxChar = (int)((hs2.getPos() - (width - 200)) / 231 * 20 + 5);
  minV = (int)((hs3.getPos() - (width - 200)) / 231 * 180 + 20);
@@ -330,64 +327,16 @@ void draw() {
  text("Taille des caratères", width - 195, 245);
  text("Rayon", width - 195, 265);
 
-
-
 }
 
-
-
-void mouseClicked() {
-
-
- for (Button but: listTreeButtons) {
-  boolean sel = but.select(mouseX, mouseY);
-  if (sel) {
-   for (Button butUn: listTreeButtons) {
-    if (butUn != but)
-     butUn.selected = false;
-   }
-   but.selected = true;
-   treeSel = but.text;
-   calculateTree();
-   break;
-  }
- }
- for (Button but: listClassButtons) {
-  boolean sel = but.select(mouseX, mouseY);
-  if (sel) {
-   for (Button butUn: listClassButtons) {
-    if (butUn != but)
-     butUn.selected = false;
-   }
-   but.selected = true;
-   classSel = but.text;
-   calculateTree();
-   break;
-  }
- }
-}
-
-
-
-void mouseMoved(MouseEvent e) {
- translateX = width - actX - mouseX * scaleFactor;
- translateY = actY - mouseY * scaleFactor;
-}
-
-void drawSuperNode(ArrayList < Node > list) {
- for (int i = 0; i < list.size(); i++) {
-  drawNode(list.get(i), 0, i * 360 / list.size(), (i + 1) * 360 / list.size());
- }
-}
-
-
+/* dessin de tous les levels */
 void drawAll(HashMap < Integer, HashMap < String, Integer >> wordCount) {
  for (Integer level: wordCount.keySet()) {
   drawLevel(wordCount.get(level), level);
  }
 }
 
-
+/* dessine un level . On tourne de angl degre pour chaque mot*/
 void drawLevel(HashMap < String, Integer > wordCount, int level) {
  float angl = 2 * PI / wordCount.size();
  int max = 0;
@@ -408,6 +357,7 @@ void drawLevel(HashMap < String, Integer > wordCount, int level) {
 
 }
 
+/* Dessine un mot en arc de cercle caractère par caractère */
 void drawWord(String message, Float r, float baseAngle) {
  // We must keep track of our position along the curve
  float arclength = 0;
@@ -438,33 +388,7 @@ void drawWord(String message, Float r, float baseAngle) {
  }
 }
 
-void drawNode(Node cuu, float levelBase, float beginangle, float endangle) {
- if (cuu == null) return;
- strokeWeight(0.5);
- //if(levelBase>maxLevel) return;
- float actLevel = baselevel + 15 * levelBase;
- float actLevelP = baselevel + 15 * ((levelBase + 1));
-
- float xbase = width * 0.5;
- float ybase = height * 0.5;
- cuu.angle = (endangle + beginangle) * 0.5;
- cuu.calculate();
- stroke(153);
- if (cuu.parent != null && cuu.parent.parent != null) {
-  Edge parente = cuu.parent;
-  parente.parent.angle = (cuu.angle - devAngle + endangle + devAngle) * 0.5;
-  parente.parent.calculate();
-  //line(cuu.x*actLevel+xbase, cuu.y*actLevel+ybase, parente.parent.x*actLevelP+xbase, parente.parent.y*actLevelP+ybase);
-  drawNode(parente.parent, levelBase + 1, cuu.angle - devAngle, endangle + devAngle);
- }
-
- textSize(3);
- strokeWeight(2);
- //point(cuu.x*actLevel+xbase, cuu.y*actLevel+ybase);
- strokeWeight(0.5);
- text(cuu.name, cuu.x * actLevel + xbase, cuu.y * actLevel + ybase);
-}
-HashMap < Integer, HashMap < String, Integer >> counterWord = new HashMap();
+/* comptage des mots de chaque level */
 void countWord(Node cuu, int levelBase) {
  if (cuu == null) return;
  if (counterWord.get(levelBase) == null) {
@@ -481,7 +405,7 @@ void countWord(Node cuu, int levelBase) {
  }
 }
 
-
+/* construit les noeuds */
 ArrayList < Node > constructNodeFrom(String patt, Edge root) {
  Edge start = root;
  ArrayList < Node > list = new ArrayList();
@@ -499,6 +423,7 @@ ArrayList < Node > constructNodeFrom(String patt, Edge root) {
 
 }
 
+/* Représentation d'un noeud */ 
 class Node {
  String name;
  String content;
@@ -532,9 +457,13 @@ class Node {
  }
 
 }
+
+/* Représentation d'une couleur*/ 
 class Color {
  color colore;
 }
+
+/* fil entre noeud */
 class Edge {
  String content;
  Node parent = null;
@@ -546,6 +475,8 @@ class Edge {
  }
 
 }
+
+/* Représentation d'une scrollbar */
 class HScrollbar {
  int swidth, sheight; // width and height of bar
  float xpos, ypos; // x and y position of bar
@@ -619,5 +550,69 @@ class HScrollbar {
   // Convert spos to be values between
   // 0 and the total width of the scrollbar
   return spos * ratio;
+ }
+}
+
+/* classe décrivant un bouton avec son affichage */
+class Button {
+ int x;
+ int y;
+ int w;
+ int h;
+ boolean over;
+ boolean selected;
+ String text;
+ float size;
+
+ Button(int x, int y, int w, int h, String text) {
+  this(x, y, w, h, text, 0.7 * h);
+ }
+
+ Button(int x, int y, int w, int h, String text, float size) {
+  this.x = x;
+  this.y = y;
+  this.w = w;
+  this.h = h;
+  this.over = false;
+  this.selected = false;
+  this.text = text;
+  this.size = size;
+ }
+
+ void draw() {
+  drawButton(x, y, w, h, over, selected, text, size);
+ }
+
+ boolean select(int xin, int yin) {
+  return isIn(xin, yin);
+
+ }
+
+ boolean isIn(int xin, int yin) {
+  return xin > x && xin < x + w && yin > y && yin < y + h;
+ }
+
+ void over(int xin, int yin) {
+  over = isIn(xin, yin);
+ }
+
+ void drawButton(int x, int y, int w, int h, boolean over, boolean selected, String text, float size) {
+  color rectColor = color(255);
+  color rectHighlight = color(150);
+  color rectHigh = color(100);
+  if (selected) {
+   fill(rectHigh);
+  } else
+  if (over) {
+   fill(rectHighlight);
+  } else {
+   fill(rectColor);
+  }
+  stroke(0);
+  textSize(size);
+  rect(x, y, w, h);
+  float si = textWidth(text);
+  fill(0);
+  text(text, x + w / 2 - si / 2, y + h / 4 * 3);
  }
 }
