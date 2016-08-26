@@ -86,8 +86,11 @@ sc.parallelize(docIds.toSeq).saveAsNewAPIHadoopFile("file:///this-is-completely-
 
 val mat = new RowMatrix(termDocMatrix)
 
+/* Calcul de la décomposition en valeurs singulières */
 val svd = mat.computeSVD(k, computeU = true)
+/* resultats par termes */
 val topConceptTerms = RunLSA.topTermsInTopConcepts(svd, nbConcept, numTerms, termIds)
+/* résultats par document */
 val topConceptDocs = RunLSA.topDocsInTopConcepts(svd, nbConcept, documentSize, docIds)
 
 var all = sc.emptyRDD[(String, Double)]
@@ -113,7 +116,7 @@ for (a <-topConceptDocs) {
 var docConceptRDD = sc.parallelize(docConcept.toSeq)
 
 var toWrite = docConceptRDD.map(a => (a._1, a._2.toArray))
-
+/*Sauvegarde dans Mongo DB*/
 db.getCollection("projetDocConcept").drop()
 val outputConfig = new Configuration()
 outputConfig.set("mongo.output.uri",
