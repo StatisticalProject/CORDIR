@@ -54,7 +54,7 @@ db.getCollection("projetDocConceptYear").drop()
 db.getCollection("projetTermConceptYear").drop()
 
 /* Boucle sur les années */
-for (year < -2006 to 2022) {
+for (year <- 2006 to 2022) {
  /* Selection des projets contenant l'année */     
  var select = documents.filter(a => a._2.get("years").asInstanceOf[List[Double]].contains(year.asInstanceOf[Double]))
  println(year + ":" + select.count())
@@ -88,15 +88,15 @@ for (year < -2006 to 2022) {
   /* Transformation de résultats des concepts/documents en documents/concetps*/
   val docConcept = new HashMap[String, ListBuffer[Double]]()
   var count = 0
-  for (a < -topConceptDocs) {
+  for (a <- topConceptDocs) {
    count += 1
-   for ((b, c) < -a) {
+   for ((b, c) <- a) {
     if (!docConcept.contains(b)) {
      docConcept.put(b, new ListBuffer[Double]())
     }
     docConcept(b) += c
    }
-   for ((k, v) < -docConcept) {
+   for ((k, v) <- docConcept) {
     while (v.size < count) {
      v += 0.0
     }
@@ -124,15 +124,15 @@ for (year < -2006 to 2022) {
 
   val termConcept = new HashMap[String, ListBuffer[Double]]()
   count = 0
-  for (a < -topConceptTerms) {
+  for (a <- topConceptTerms) {
    count += 1
-   for ((b, c) < -a) {
+   for ((b, c) <- a) {
     if (!termConcept.contains(b)) {
      termConcept.put(b, new ListBuffer[Double]())
     }
     termConcept(b) += c
    }
-   for ((k, v) < -termConcept) {
+   for ((k, v) <- termConcept) {
     while (v.size < count) {
      v += 0.0
     }

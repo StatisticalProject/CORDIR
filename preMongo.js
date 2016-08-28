@@ -38,5 +38,18 @@ db.project.find().snapshot().forEach(function(el) {
        el.catCost=">3000k"
        el.catCostNum=2 
     }
+    if (!el.years||!Array.isArray(el.years)) {
+        el.endDate=new Date(el.endDate);
+        el.startDate=new Date(el.startDate);
+        el.period=el.endDate.getFullYear()-el.startDate.getFullYear()+1;
+        if(el.period>0){
+            el.years=Array.apply(0, Array(el.period)).map(function (element, index) { 
+                return index + el.startDate.getFullYear();  
+            });
+        }else{
+            el.years = [el.startDate.getFullYear()];
+        }
+        
+    }
     db.project.save(el); 
 }); 
